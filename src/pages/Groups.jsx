@@ -86,7 +86,7 @@ const Groups = () => {
       <div className="px-4 py-6 pb-24 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-gray-700">Chargement...</p>
         </div>
       </div>
     )
@@ -180,11 +180,11 @@ const Groups = () => {
       )}
 
       {groups.length === 0 ? (
-        <Card>
+        <Card className="bg-gray-50">
           <CardContent className="p-12 text-center">
-            <Users size={48} className="mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Aucun groupe</h3>
-            <p className="text-muted-foreground mb-4">
+            <Users size={48} className="mx-auto mb-4 text-gray-500" />
+            <h3 className="text-lg font-semibold mb-2 text-gray-800">Aucun groupe</h3>
+            <p className="text-gray-700 mb-4">
               Créez votre premier groupe pour commencer à partager les dépenses
             </p>
             <Button onClick={() => setCreateDialogOpen(true)}>
@@ -198,9 +198,9 @@ const Groups = () => {
           {groups.map((group) => (
             <Card
               key={group.id}
-              className={`cursor-pointer transition-colors ${
+              className={`cursor-pointer transition-colors bg-gray-50 ${
                 currentGroupId === group.id
-                  ? 'border-gray-400 bg-gray-50'
+                  ? 'border-gray-400 bg-slate-100'
                   : 'hover:border-gray-300'
               }`}
               onClick={() => handleGroupClick(group.id)}
@@ -215,11 +215,11 @@ const Groups = () => {
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{group.name}</h3>
                         {group.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm text-gray-700 mt-1">
                             {group.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-700">
                           <span>{group.memberCount} membre{group.memberCount > 1 ? 's' : ''}</span>
                         </div>
                       </div>
@@ -276,7 +276,7 @@ const Groups = () => {
                 </h4>
                 <div className="space-y-2">
                   {selectedGroup.members.map((member) => (
-                    <Card key={member.id} className="rounded-xl">
+                    <Card key={member.id} className="rounded-xl bg-gray-50">
                       <CardContent className="p-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold">

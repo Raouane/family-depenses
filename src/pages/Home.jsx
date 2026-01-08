@@ -63,7 +63,7 @@ const Home = () => {
       <div className="px-4 py-6 pb-24 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-gray-700">Chargement...</p>
         </div>
       </div>
     )

@@ -155,7 +155,7 @@ const AddExpense = () => {
             placeholder="0.00"
             className="w-full text-5xl font-bold text-center border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-auto py-0"
           />
-          <div className="text-center text-muted-foreground text-lg mt-2">€</div>
+          <div className="text-center text-gray-700 text-lg mt-2">€</div>
         </div>
 
         {/* Formulaire */}

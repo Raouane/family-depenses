@@ -146,7 +146,7 @@ const Expenses = () => {
       <div className="sticky top-0 bg-white border-b z-10 px-4 py-4">
         <h1 className="text-2xl font-bold mb-4 text-foreground">Dépenses</h1>
         <div className="relative">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10" />
+          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 z-10" />
           <Input
             type="text"
             value={searchQuery}
@@ -239,7 +239,7 @@ const Expenses = () => {
                 <h3 className="text-xl font-bold mb-3 text-foreground">
                   {selectedExpense.title}
                 </h3>
-                <div className="text-muted-foreground">
+                <div className="text-gray-700">
                   Payé par {selectedExpense.paidBy} le{' '}
                   {selectedExpense.date.toLocaleDateString('fr-FR', {
                     day: 'numeric',
@@ -273,7 +273,7 @@ const Expenses = () => {
                                 {share.name}
                               </div>
                               {share.amount === 0 && (
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-gray-700">
                                   Exclu du partage
                                 </div>
                               )}

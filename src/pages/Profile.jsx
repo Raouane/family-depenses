@@ -93,7 +93,7 @@ const Profile = () => {
       <div className="px-4 py-6 pb-24 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-gray-700">Chargement...</p>
         </div>
       </div>
     )
@@ -213,7 +213,7 @@ const Profile = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold">{user?.name}</h3>
-                  <div className="flex items-center gap-2 mt-1 text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1 text-gray-700">
                     <Mail size={16} />
                     <span>{user?.email}</span>
                   </div>
@@ -247,7 +247,7 @@ const Profile = () => {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium">Notifications</h4>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-700">
                 Recevoir des notifications pour les nouvelles dépenses
               </p>
             </div>
