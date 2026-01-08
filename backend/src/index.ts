@@ -59,7 +59,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api', routes)
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok', message: 'FamilySplit API is running' })
 })
 
@@ -72,7 +72,7 @@ if (isProduction) {
   app.use(express.static(frontendDistPath))
   
   // Pour toutes les routes non-API, servir index.html (SPA routing)
-  app.get('*', (req, res) => {
+  app.get('*', (req: express.Request, res: express.Response) => {
     // Ne pas intercepter les routes API
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'Route not found' })
@@ -92,7 +92,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // 404 handler pour les routes API (seulement en développement ou si ce n'est pas une route frontend)
 if (!isProduction) {
-  app.use((req, res) => {
+  app.use((req: express.Request, res: express.Response) => {
     res.status(404).json({ error: 'Route not found' })
   })
 }

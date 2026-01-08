@@ -110,7 +110,7 @@ router.get(
       const groups = await getUserGroups(userId)
       
       res.json({
-        groups: groups.map((group) => ({
+        groups: groups.map((group: any) => ({
           id: group.id,
           name: group.name,
           description: group.description,
@@ -148,7 +148,7 @@ router.get(
         name: group.name,
         description: group.description,
         createdAt: group.created_at.toISOString(),
-        members: users.map((user) => ({
+        members: users.map((user: any) => ({
           id: user.id,
           name: user.name,
           initial: user.initial,

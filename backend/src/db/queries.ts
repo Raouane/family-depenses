@@ -43,7 +43,7 @@ export async function getGroupSummary(groupId: string): Promise<GroupSummary[]> 
     'SELECT * FROM get_group_summary($1)',
     [groupId]
   )
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     total_balance: parseFloat(row.total_balance),
     user_id: row.user_id,
     user_name: row.user_name,
@@ -88,7 +88,7 @@ export async function getGroupExpenses(
   query += ' ORDER BY e.date DESC, e.created_at DESC'
 
   const result = await pool.query(query, params)
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     amount: parseFloat(row.amount),
     date: new Date(row.date),
@@ -152,7 +152,7 @@ export async function getExpenseById(expenseId: string): Promise<ExpenseWithShar
     date: new Date(expense.date),
     created_at: new Date(expense.created_at),
     updated_at: new Date(expense.updated_at),
-    shares: sharesResult.rows.map((row) => ({
+    shares: sharesResult.rows.map((row: any) => ({
       user_id: row.user_id,
       user_name: row.user_name,
       user_initial: row.user_initial,
@@ -262,7 +262,7 @@ export async function getUserGroups(userId: string) {
     `,
     [userId]
   )
-  return result.rows.map((row) => ({
+  return result.rows.map((row: any) => ({
     ...row,
     created_at: new Date(row.created_at),
     member_count: parseInt(row.member_count),
