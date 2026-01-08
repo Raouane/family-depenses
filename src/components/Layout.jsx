@@ -1,9 +1,16 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, DollarSign, Users, User } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 
 const Layout = ({ children }) => {
   const location = useLocation()
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  
+  // Ne pas afficher la navigation sur la page de login
+  if (location.pathname === '/login') {
+    return <>{children}</>
+  }
 
   const navItems = [
     { path: '/', icon: Home, label: 'Accueil' },
@@ -15,7 +22,7 @@ const Layout = ({ children }) => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-area-bottom">
+    <div className="min-h-screen bg-gray-50 pb-20 safe-area-bottom">
       <main className="max-w-md mx-auto bg-white min-h-screen">
         {children}
       </main>

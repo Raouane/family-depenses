@@ -1,21 +1,21 @@
--- Script SQL pour FamilySplit - Version Supabase
--- À copier-coller dans le SQL Editor de Supabase
+-- Script de nettoyage et correction pour Supabase
+-- Supprime les tables indésirables et crée les tables manquantes
 
--- Extension pour les UUIDs (déjà disponible sur Supabase, mais on s'assure qu'elle est activée)
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- ============================================
+-- ÉTAPE 1 : Supprimer les tables indésirables
+-- ============================================
 
--- Table des utilisateurs
--- L'ID est lié à auth.users.id de Supabase (l'ID de l'utilisateur authentifié)
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    initial CHAR(1) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- Supprimer la table restaurants (si elle existe)
+DROP TABLE IF EXISTS restaurants CASCADE;
 
--- Table des groupes
+-- Supprimer la table telegram_messages (si elle existe)
+DROP TABLE IF EXISTS telegram_messages CASCADE;
+
+-- ============================================
+-- ÉTAPE 2 : Créer les tables manquantes
+-- ============================================
+
+-- Table des groupes (si elle n'existe pas)
 CREATE TABLE IF NOT EXISTS groups (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
@@ -24,16 +24,7 @@ CREATE TABLE IF NOT EXISTS groups (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table de liaison utilisateurs-groupes (many-to-many)
-CREATE TABLE IF NOT EXISTS user_groups (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-    joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, group_id)
-);
-
--- Table des dépenses
+-- Table des dépenses (si elle n'existe pas)
 CREATE TABLE IF NOT EXISTS expenses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
@@ -47,7 +38,7 @@ CREATE TABLE IF NOT EXISTS expenses (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table de répartition des dépenses (qui participe à quelle dépense)
+-- Table de répartition des dépenses (si elle n'existe pas)
 CREATE TABLE IF NOT EXISTS expense_shares (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     expense_id UUID NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
@@ -57,7 +48,10 @@ CREATE TABLE IF NOT EXISTS expense_shares (
     UNIQUE(expense_id, user_id)
 );
 
--- Index pour améliorer les performances
+-- ============================================
+-- ÉTAPE 3 : Créer les index manquants
+-- ============================================
+
 CREATE INDEX IF NOT EXISTS idx_expenses_group_id ON expenses(group_id);
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date DESC);
 CREATE INDEX IF NOT EXISTS idx_expenses_paid_by ON expenses(paid_by_user_id);
@@ -65,6 +59,10 @@ CREATE INDEX IF NOT EXISTS idx_expense_shares_expense_id ON expense_shares(expen
 CREATE INDEX IF NOT EXISTS idx_expense_shares_user_id ON expense_shares(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_groups_user_id ON user_groups(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_groups_group_id ON user_groups(group_id);
+
+-- ============================================
+-- ÉTAPE 4 : Créer les fonctions manquantes
+-- ============================================
 
 -- Fonction pour calculer automatiquement les parts lors de la création d'une dépense
 CREATE OR REPLACE FUNCTION calculate_expense_shares(
@@ -89,36 +87,6 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
-
--- Vue pour calculer les soldes par utilisateur dans un groupe
-CREATE OR REPLACE VIEW user_balances AS
-SELECT 
-    ug.group_id,
-    u.id AS user_id,
-    u.name AS user_name,
-    u.initial,
-    COALESCE(paid.total_paid, 0) AS total_paid,
-    COALESCE(owed.total_owed, 0) AS total_owed,
-    COALESCE(paid.total_paid, 0) - COALESCE(owed.total_owed, 0) AS balance
-FROM user_groups ug
-JOIN users u ON ug.user_id = u.id
-LEFT JOIN (
-    SELECT 
-        e.group_id,
-        e.paid_by_user_id AS user_id,
-        SUM(e.amount) AS total_paid
-    FROM expenses e
-    GROUP BY e.group_id, e.paid_by_user_id
-) paid ON ug.group_id = paid.group_id AND ug.user_id = paid.user_id
-LEFT JOIN (
-    SELECT 
-        e.group_id,
-        es.user_id,
-        SUM(es.share_amount) AS total_owed
-    FROM expense_shares es
-    JOIN expenses e ON es.expense_id = e.id
-    GROUP BY e.group_id, es.user_id
-) owed ON ug.group_id = owed.group_id AND ug.user_id = owed.user_id;
 
 -- Fonction pour obtenir le résumé d'un groupe
 CREATE OR REPLACE FUNCTION get_group_summary(p_group_id UUID)
@@ -149,7 +117,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- NOTE: Les données d'exemple ont été retirées car elles nécessitent que les utilisateurs
--- existent d'abord dans auth.users. Pour créer des données de test :
--- 1. Créez d'abord les utilisateurs via l'interface d'inscription de l'application
--- 2. Ensuite, utilisez le script database/seed_data.sql (à créer si nécessaire)
+-- ============================================
+-- ÉTAPE 5 : Recréer la vue user_balances (si nécessaire)
+-- ============================================
+
+CREATE OR REPLACE VIEW user_balances AS
+SELECT 
+    ug.group_id,
+    u.id AS user_id,
+    u.name AS user_name,
+    u.initial,
+    COALESCE(paid.total_paid, 0) AS total_paid,
+    COALESCE(owed.total_owed, 0) AS total_owed,
+    COALESCE(paid.total_paid, 0) - COALESCE(owed.total_owed, 0) AS balance
+FROM user_groups ug
+JOIN users u ON ug.user_id = u.id
+LEFT JOIN (
+    SELECT 
+        e.group_id,
+        e.paid_by_user_id AS user_id,
+        SUM(e.amount) AS total_paid
+    FROM expenses e
+    GROUP BY e.group_id, e.paid_by_user_id
+) paid ON ug.group_id = paid.group_id AND ug.user_id = paid.user_id
+LEFT JOIN (
+    SELECT 
+        e.group_id,
+        es.user_id,
+        SUM(es.share_amount) AS total_owed
+    FROM expense_shares es
+    JOIN expenses e ON es.expense_id = e.id
+    GROUP BY e.group_id, es.user_id
+) owed ON ug.group_id = owed.group_id AND ug.user_id = owed.user_id;

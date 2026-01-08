@@ -12,7 +12,13 @@ export function GroupProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadGroups()
+    // Vérifier si l'utilisateur est authentifié (token présent)
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      loadGroups()
+    } else {
+      setLoading(false)
+    }
   }, [])
 
   const loadGroups = async () => {

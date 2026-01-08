@@ -10,17 +10,19 @@
     "build:all": "npm install --include=dev && npm run build && cd backend && NPM_CONFIG_PRODUCTION=false npm install && npm run build"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@supabase/auth-helpers-react": "^0.15.0",
+    "@supabase/supabase-js": "^2.90.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
-    "lucide-react": "^0.294.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.0.0",
-    "tailwind-merge": "^2.2.0",
-    "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-dialog": "^1.0.5",
-    "@radix-ui/react-select": "^2.0.0",
-    "@radix-ui/react-switch": "^1.0.3"
+    "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

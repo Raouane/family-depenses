@@ -1,3 +1,5 @@
+import { supabase } from '@/lib/supabase'
+
 // En production, utiliser l'URL relative (même domaine)
 // En développement, utiliser l'URL du backend local
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
@@ -9,9 +11,14 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ||
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
   
+  // Récupérer le token d'authentification Supabase
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token
+  
   const config = {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,

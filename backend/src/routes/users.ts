@@ -1,6 +1,7 @@
 import express from 'express'
 import { param, body, validationResult } from 'express-validator'
 import { getUserById, updateUser } from '../db/queries.js'
+import { authenticate } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -19,6 +20,7 @@ const validate = (req: express.Request, res: express.Response, next: express.Nex
  */
 router.get(
   '/:userId',
+  authenticate,
   [param('userId').isUUID().withMessage('Invalid user ID')],
   validate,
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -49,6 +51,7 @@ router.get(
  */
 router.put(
   '/:userId',
+  authenticate,
   [
     param('userId').isUUID().withMessage('Invalid user ID'),
     body('name').optional().trim().isLength({ min: 1, max: 100 }),

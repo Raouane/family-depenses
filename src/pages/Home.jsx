@@ -5,13 +5,16 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getGroupSummary } from '@/services/groups'
 import { useGroup } from '@/context/GroupContext'
+import { useAuth } from '@/context/AuthContext'
 
 const Home = () => {
   const navigate = useNavigate()
   const { currentGroupId } = useGroup()
+  const { user: currentUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [totalBalance, setTotalBalance] = useState(0)
+  const [userBalance, setUserBalance] = useState(0)
+  const [userBalanceStatus, setUserBalanceStatus] = useState('settled')
   const [users, setUsers] = useState([])
 
   useEffect(() => {
@@ -24,17 +27,27 @@ const Home = () => {
   }, [currentGroupId])
 
   const loadSummary = async () => {
-    if (!currentGroupId) return
+    if (!currentGroupId || !currentUser) return
     
     try {
       setLoading(true)
       setError(null)
       const data = await getGroupSummary(currentGroupId)
-      setTotalBalance(data.totalBalance)
       
-      // Filtrer l'utilisateur actuel (Mohamed) et formater les autres
+      // Trouver le solde de l'utilisateur actuel
+      const currentUserData = data.users.find(user => user.userId === currentUser.id)
+      
+      if (currentUserData) {
+        setUserBalance(currentUserData.balance)
+        setUserBalanceStatus(currentUserData.status)
+      } else {
+        setUserBalance(0)
+        setUserBalanceStatus('settled')
+      }
+      
+      // Filtrer les autres utilisateurs (pas l'utilisateur actuel)
       const brothers = data.users
-        .filter(user => user.balance !== 0)
+        .filter(user => user.userId !== currentUser.id && user.balance !== 0)
         .map(user => ({
           id: user.userId,
           name: user.name,
@@ -92,23 +105,37 @@ const Home = () => {
       {/* En-tête */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground">
-          Salut Mohamed 👋
+          Salut {currentUser?.name || 'Utilisateur'} 👋
         </h1>
         <p className="text-base text-slate-700 mt-2 font-medium">Voici votre résumé financier</p>
       </div>
 
-      {/* Carte solde total */}
-      <Card className="bg-gradient-to-br from-gray-600 to-gray-700 border-0 mb-6 shadow-lg">
+      {/* Carte solde personnel */}
+      <Card className={`bg-gradient-to-br ${
+        userBalanceStatus === 'receive' 
+          ? 'from-green-600 to-green-700' 
+          : userBalanceStatus === 'pay'
+          ? 'from-red-600 to-red-700'
+          : 'from-gray-600 to-gray-700'
+      } border-0 mb-6 shadow-lg`}>
         <CardContent className="p-6">
-          <div className="text-white text-base font-semibold mb-3">Solde total du groupe</div>
+          <div className="text-white text-base font-semibold mb-3">
+            {userBalanceStatus === 'receive' 
+              ? 'On vous doit' 
+              : userBalanceStatus === 'pay'
+              ? 'Vous devez'
+              : 'Votre solde'}
+          </div>
           <div className="text-white text-5xl font-bold mb-3">
-            {totalBalance.toLocaleString('fr-FR', {
+            {Math.abs(userBalance).toLocaleString('fr-FR', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             })} €
           </div>
           <div className="text-white text-sm font-medium">
-            En date du {currentDate}
+            {userBalanceStatus === 'settled' 
+              ? 'Compte équilibré' 
+              : `En date du ${currentDate}`}
           </div>
         </CardContent>
       </Card>

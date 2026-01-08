@@ -9,10 +9,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { createExpense } from '@/services/expenses'
 import { getGroupUsers } from '@/services/groups'
 import { useGroup } from '@/context/GroupContext'
+import { useAuth } from '@/context/AuthContext'
 
 const AddExpense = () => {
   const navigate = useNavigate()
   const { currentGroupId } = useGroup()
+  const { user: currentUser } = useAuth()
   const [amount, setAmount] = useState('0.00')
   const [title, setTitle] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -30,7 +32,7 @@ const AddExpense = () => {
       setError('Aucun groupe sélectionné. Veuillez sélectionner un groupe.')
       setLoadingMembers(false)
     }
-  }, [currentGroupId])
+  }, [currentGroupId, currentUser])
 
   const loadMembers = async () => {
     try {
@@ -45,8 +47,16 @@ const AddExpense = () => {
       })
       setSharedWith(initialShared)
       
-      // Définir le premier membre comme payeur par défaut
-      if (data.members.length > 0) {
+      // Définir l'utilisateur connecté comme payeur par défaut
+      if (currentUser && data.members.length > 0) {
+        const currentUserMember = data.members.find(m => m.id === currentUser.id)
+        if (currentUserMember) {
+          setPaidBy(currentUser.id)
+        } else {
+          // Si l'utilisateur n'est pas dans le groupe, utiliser le premier membre
+          setPaidBy(data.members[0].id)
+        }
+      } else if (data.members.length > 0) {
         setPaidBy(data.members[0].id)
       }
     } catch (err) {
@@ -131,7 +141,7 @@ const AddExpense = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* En-tête avec retour */}
       <div className="sticky top-0 bg-white border-b border-gray-200 z-10 px-4 py-4 flex items-center gap-4">
         <Button
@@ -187,7 +197,7 @@ const AddExpense = () => {
             />
           </div>
 
-          {/* Payé par */}
+          {/* Payé par - Automatiquement défini sur l'utilisateur connecté */}
           <div>
             <label className="block text-base font-semibold text-foreground mb-3">
               Payé par
@@ -205,10 +215,16 @@ const AddExpense = () => {
                   {members.map((member) => (
                     <SelectItem key={member.id} value={member.id}>
                       {member.name}
+                      {member.id === currentUser?.id && ' (Vous)'}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+            )}
+            {currentUser && paidBy === currentUser.id && (
+              <p className="text-sm text-gray-600 mt-2">
+                Vous êtes automatiquement défini comme payeur
+              </p>
             )}
           </div>
         </div>

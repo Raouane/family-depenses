@@ -10,6 +10,7 @@ import {
   addUserToGroup,
   removeUserFromGroup
 } from '../db/queries.js'
+import { authenticate } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -99,14 +100,14 @@ router.get(
 
 /**
  * GET /api/groups
- * Get all groups for a user (hardcoded userId for now)
+ * Get all groups for a user
  */
 router.get(
   '/',
+  authenticate,
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-      // TODO: Get userId from auth/session
-      const userId = '550e8400-e29b-41d4-a716-446655440000' // Mohamed
+      const userId = req.userId!
       const groups = await getUserGroups(userId)
       
       res.json({
@@ -167,6 +168,7 @@ router.get(
  */
 router.post(
   '/',
+  authenticate,
   [
     body('name').trim().isLength({ min: 1, max: 100 }).withMessage('Name is required (max 100 chars)'),
     body('description').optional().isString().trim(),
@@ -174,8 +176,7 @@ router.post(
   validate,
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-      // TODO: Get userId from auth/session
-      const userId = '550e8400-e29b-41d4-a716-446655440000' // Mohamed
+      const userId = req.userId!
       
       const group = await createGroup({
         name: req.body.name,

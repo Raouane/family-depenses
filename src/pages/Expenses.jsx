@@ -141,7 +141,7 @@ const Expenses = () => {
   }, {})
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24">
       {/* En-tête avec recherche */}
       <div className="sticky top-0 bg-white border-b z-10 px-4 py-4">
         <h1 className="text-2xl font-bold mb-4 text-foreground">Dépenses</h1>

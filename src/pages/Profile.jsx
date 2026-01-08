@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { getUserProfile, updateUserProfile } from '@/services/users'
-
-// User ID hardcodé pour l'instant (Mohamed)
-const USER_ID = '550e8400-e29b-41d4-a716-446655440000'
+import { useAuth } from '@/context/AuthContext'
 
 const Profile = () => {
+  const { user: currentUser, logout } = useAuth()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -22,14 +21,18 @@ const Profile = () => {
   })
 
   useEffect(() => {
-    loadProfile()
-  }, [])
+    if (currentUser) {
+      loadProfile()
+    }
+  }, [currentUser])
 
   const loadProfile = async () => {
+    if (!currentUser) return
+    
     try {
       setLoading(true)
       setError(null)
-      const data = await getUserProfile(USER_ID)
+      const data = await getUserProfile(currentUser.id)
       setUser(data)
       setFormData({
         name: data.name,
@@ -61,7 +64,9 @@ const Profile = () => {
     try {
       setSaving(true)
       setError(null)
-      const updated = await updateUserProfile(USER_ID, {
+      if (!currentUser) return
+      
+      const updated = await updateUserProfile(currentUser.id, {
         name: formData.name.trim(),
         email: formData.email.trim(),
         initial: formData.initial.trim().toUpperCase(),
