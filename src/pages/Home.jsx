@@ -75,9 +75,9 @@ const Home = () => {
         <div className="mb-6">
           <h1 className="text-2xl font-semibold">Salut Mohamed 👋</h1>
         </div>
-        <Card className="border-destructive">
+        <Card className="border-red-300 bg-red-50">
           <CardContent className="p-6">
-            <p className="text-destructive mb-4">{error}</p>
+            <p className="text-red-700 mb-4 font-medium">{error}</p>
             <Button onClick={loadSummary} variant="outline">
               Réessayer
             </Button>
@@ -120,15 +120,15 @@ const Home = () => {
         </h2>
         
         {users.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
+          <Card className="bg-gray-50">
+            <CardContent className="p-6 text-center text-gray-700">
               Tous les comptes sont équilibrés
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-3">
             {users.map((brother) => (
-            <Card key={brother.id} className="rounded-2xl">
+            <Card key={brother.id} className="rounded-2xl bg-gray-50">
               <CardContent className="p-4 flex items-center gap-4">
               {/* Avatar */}
               <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">

@@ -224,15 +224,15 @@ const AddExpense = () => {
               <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
             </div>
           ) : members.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
+            <Card className="bg-gray-50">
+              <CardContent className="p-6 text-center text-gray-700">
                 Aucun membre dans ce groupe
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-3">
               {members.map((member) => (
-              <Card key={member.id} className="rounded-2xl">
+              <Card key={member.id} className="rounded-2xl bg-gray-50">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -283,8 +283,8 @@ const AddExpense = () => {
 
         {/* Message d'erreur */}
         {error && (
-          <div className="mt-4 p-4 rounded-2xl bg-destructive/10 border border-destructive/20">
-            <p className="text-sm text-destructive">{error}</p>
+          <div className="mt-4 p-4 rounded-2xl bg-red-50 border border-red-200">
+            <p className="text-sm text-red-700 font-medium">{error}</p>
           </div>
         )}
 

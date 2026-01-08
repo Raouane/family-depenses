@@ -133,8 +133,8 @@ const Groups = () => {
                   />
                 </div>
                 {error && (
-                  <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                    <p className="text-sm text-destructive">{error}</p>
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                    <p className="text-sm text-red-700 font-medium">{error}</p>
                   </div>
                 )}
               </div>
@@ -169,9 +169,9 @@ const Groups = () => {
 
       {/* Liste des groupes */}
       {error && !loading && (
-        <Card className="border-destructive mb-4">
+        <Card className="border-red-300 bg-red-50 mb-4">
           <CardContent className="p-6">
-            <p className="text-destructive mb-4">{error}</p>
+            <p className="text-red-700 mb-4 font-medium">{error}</p>
             <Button onClick={loadGroups} variant="outline">
               Réessayer
             </Button>

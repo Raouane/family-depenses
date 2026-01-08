@@ -164,17 +164,17 @@ const Expenses = () => {
             <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
           </div>
         ) : error ? (
-          <Card className="border-destructive">
+          <Card className="border-red-300 bg-red-50">
             <CardContent className="p-6">
-              <p className="text-destructive mb-4">{error}</p>
+              <p className="text-red-700 mb-4 font-medium">{error}</p>
               <Button onClick={loadExpenses} variant="outline">
                 Réessayer
               </Button>
             </CardContent>
           </Card>
         ) : Object.keys(groupedExpenses).length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-center text-muted-foreground">
+          <Card className="bg-gray-50">
+            <CardContent className="p-6 text-center text-gray-700">
               Aucune dépense trouvée
             </CardContent>
           </Card>
@@ -188,7 +188,7 @@ const Expenses = () => {
               {monthExpenses.map((expense) => (
                 <Card
                   key={expense.id}
-                  className="rounded-2xl cursor-pointer hover:border-gray-300 transition-colors"
+                  className="rounded-2xl cursor-pointer hover:border-gray-300 transition-colors bg-gray-50"
                   onClick={() => handleExpenseClick(expense)}
                 >
                   <CardContent className="p-4 flex items-center gap-4">
@@ -262,7 +262,7 @@ const Expenses = () => {
                 <div className="space-y-3">
                   {selectedExpense.shares && selectedExpense.shares.length > 0 ? (
                     selectedExpense.shares.map((share) => (
-                      <Card key={share.userId} className="rounded-2xl">
+                      <Card key={share.userId} className="rounded-2xl bg-gray-50">
                         <CardContent className="p-3 flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold">
@@ -289,7 +289,7 @@ const Expenses = () => {
                       </Card>
                     ))
                   ) : (
-                    <p className="text-muted-foreground text-center py-4">
+                    <p className="text-gray-700 text-center py-4">
                       Aucune répartition disponible
                     </p>
                   )}

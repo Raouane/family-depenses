@@ -172,8 +172,8 @@ const Profile = () => {
                 />
               </div>
               {error && (
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                  <p className="text-sm text-destructive">{error}</p>
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                  <p className="text-sm text-red-700 font-medium">{error}</p>
                 </div>
               )}
               <div className="flex gap-3 pt-2">
@@ -239,9 +239,9 @@ const Profile = () => {
       </Card>
 
       {/* Section paramètres */}
-      <Card>
+      <Card className="bg-gray-50">
         <CardHeader>
-          <CardTitle>Paramètres</CardTitle>
+          <CardTitle className="text-gray-800">Paramètres</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
