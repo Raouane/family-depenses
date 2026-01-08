@@ -1,0 +1,10 @@
+{
+  "name": "FamilySplit",
+  "short_name": "FamilySplit",
+  "description": "Application de partage de frais en famille",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait"
+}

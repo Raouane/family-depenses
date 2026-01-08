@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 250 250 250;
+    --foreground: 15 23 42; /* Texte principal plus foncé */
+    --card: 0 0% 100%;
+    --card-foreground: 15 23 42; /* Texte des cartes plus foncé */
+    --popover: 0 0% 100%;
+    --popover-foreground: 15 23 42;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
+    --secondary: 241 245 249;
+    --secondary-foreground: 15 23 42;
+    --muted: 241 245 249;
+    --muted-foreground: 51 65 85; /* Plus foncé pour meilleur contraste */
+    --accent: 241 245 249;
+    --accent-foreground: 15 23 42;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 59 130 246;
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 16px; /* Taille de base plus grande */
+    line-height: 1.6; /* Meilleur espacement entre les lignes */
+  }
+  
+  /* Améliorer la lisibilité des textes */
+  p, span, div {
+    @apply text-base; /* Taille de base pour tous les textes */
+  }
+  
+  /* Textes plus foncés pour meilleur contraste */
+  .text-muted-foreground {
+    @apply text-slate-700; /* Plus foncé que le gris par défaut */
+  }
+}
+
+@layer utilities {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
