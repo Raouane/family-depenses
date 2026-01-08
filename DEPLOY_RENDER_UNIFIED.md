@@ -27,7 +27,12 @@ familysplit
 
 **Build Command** :
 ```bash
-npm install && npm run build:all
+npm install --include=dev && npm run build:all
+```
+
+**OU** (alternative si la première ne fonctionne pas) :
+```bash
+NPM_CONFIG_PRODUCTION=false npm install && npm run build:all
 ```
 
 **Start Command** :
