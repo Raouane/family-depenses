@@ -1,13 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
-import { createClient } from '@supabase/supabase-js'
+import jwt from 'jsonwebtoken'
 
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
-
-// Créer le client Supabase pour vérifier les tokens
-const supabase = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
 
 // Étendre le type Request pour inclure userId
 declare global {
@@ -19,7 +13,7 @@ declare global {
 }
 
 /**
- * Middleware pour vérifier le token Supabase et extraire l'userId
+ * Middleware pour vérifier le token JWT et extraire l'userId
  */
 export async function authenticate(req: Request, res: Response, next: NextFunction) {
   try {
@@ -32,24 +26,17 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 
     const token = authHeader.substring(7)
 
-    // Si Supabase n'est pas configuré, retourner une erreur
-    if (!supabase) {
-      console.warn('Supabase non configuré, vérification du token impossible')
-      return res.status(500).json({ error: 'Configuration d\'authentification manquante' })
-    }
-
-    // Vérifier le token avec Supabase
-    const { data: { user }, error } = await supabase.auth.getUser(token)
-
-    if (error || !user) {
-      return res.status(401).json({ error: 'Token invalide ou expiré' })
-    }
+    // Vérifier le token JWT
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string }
 
     // Ajouter userId à la requête
-    req.userId = user.id
+    req.userId = decoded.userId
 
     next()
   } catch (error: any) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token invalide ou expiré' })
+    }
     console.error('Error in authentication middleware:', error)
     return res.status(401).json({ error: 'Erreur d\'authentification' })
   }
