@@ -92,7 +92,7 @@ const Profile = () => {
     return (
       <div className="px-4 py-6 pb-24 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
           <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
@@ -208,7 +208,7 @@ const Profile = () => {
           ) : (
             <>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-2xl">
+                <div className="w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold text-2xl">
                   {user?.initial || 'U'}
                 </div>
                 <div className="flex-1">

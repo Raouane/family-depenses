@@ -194,7 +194,7 @@ const AddExpense = () => {
             </label>
             {loadingMembers ? (
               <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
               </div>
             ) : (
               <Select value={paidBy} onValueChange={setPaidBy}>
@@ -221,7 +221,7 @@ const AddExpense = () => {
           
           {loadingMembers ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
             </div>
           ) : members.length === 0 ? (
             <Card>
@@ -237,7 +237,7 @@ const AddExpense = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {/* Avatar */}
-                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold">
                         {member.initial}
                       </div>
                       <span className="font-semibold text-base text-foreground">{member.name}</span>

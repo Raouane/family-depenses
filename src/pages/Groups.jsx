@@ -85,7 +85,7 @@ const Groups = () => {
     return (
       <div className="px-4 py-6 pb-24 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
           <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
@@ -200,8 +200,8 @@ const Groups = () => {
               key={group.id}
               className={`cursor-pointer transition-colors ${
                 currentGroupId === group.id
-                  ? 'border-primary bg-primary/5'
-                  : 'hover:border-primary/20'
+                  ? 'border-gray-400 bg-gray-50'
+                  : 'hover:border-gray-300'
               }`}
               onClick={() => handleGroupClick(group.id)}
             >
@@ -209,8 +209,8 @@ const Groups = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Users size={24} className="text-primary" />
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Users size={24} className="text-gray-600" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{group.name}</h3>
@@ -227,7 +227,7 @@ const Groups = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {currentGroupId === group.id && (
-                      <div className="flex items-center gap-2 text-primary">
+                      <div className="flex items-center gap-2 text-gray-700">
                         <Check size={20} />
                         <span className="text-sm font-medium">Actif</span>
                       </div>
@@ -279,7 +279,7 @@ const Groups = () => {
                     <Card key={member.id} className="rounded-xl">
                       <CardContent className="p-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                          <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold">
                             {member.initial}
                           </div>
                           <div>

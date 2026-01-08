@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
               onClick={() => navigate(path)}
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                 isActive(path)
-                  ? 'text-primary'
+                  ? 'text-gray-700'
                   : 'text-gray-400'
               }`}
             >

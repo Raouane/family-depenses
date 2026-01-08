@@ -1,12 +1,13 @@
 #!/bin/bash
-# Script de build pour Render
-set -e
+# Script de build pour Render - Frontend + Backend ensemble
+
+set -e  # Arrêter en cas d'erreur
 
 echo "🔨 Installing frontend dependencies..."
 npm install
 
 echo "🔨 Building frontend..."
-npx vite build
+npm run build
 
 echo "🔨 Installing backend dependencies..."
 cd backend

@@ -62,7 +62,7 @@ const Home = () => {
     return (
       <div className="px-4 py-6 pb-24 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
           <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
@@ -98,7 +98,7 @@ const Home = () => {
       </div>
 
       {/* Carte solde total */}
-      <Card className="bg-gradient-to-br from-primary to-primary-dark border-0 mb-6 shadow-lg">
+      <Card className="bg-gradient-to-br from-gray-600 to-gray-700 border-0 mb-6 shadow-lg">
         <CardContent className="p-6">
           <div className="text-white text-base font-semibold mb-3">Solde total du groupe</div>
           <div className="text-white text-5xl font-bold mb-3">
@@ -131,7 +131,7 @@ const Home = () => {
             <Card key={brother.id} className="rounded-2xl">
               <CardContent className="p-4 flex items-center gap-4">
               {/* Avatar */}
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
                 {brother.initial}
               </div>
 

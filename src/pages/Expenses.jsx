@@ -116,13 +116,13 @@ const Expenses = () => {
   const getCategoryIcon = (category) => {
     switch (category) {
       case 'travel':
-        return <Plane size={20} className="text-blue-500" />
+        return <Plane size={20} className="text-gray-600" />
       case 'food':
-        return <Utensils size={20} className="text-orange-500" />
+        return <Utensils size={20} className="text-gray-600" />
       case 'rent':
-        return <HomeIcon size={20} className="text-purple-500" />
+        return <HomeIcon size={20} className="text-gray-600" />
       default:
-        return <DollarSign size={20} className="text-gray-500" />
+        return <DollarSign size={20} className="text-gray-600" />
     }
   }
 
@@ -161,7 +161,7 @@ const Expenses = () => {
       <div className="px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
           </div>
         ) : error ? (
           <Card className="border-destructive">
@@ -188,7 +188,7 @@ const Expenses = () => {
               {monthExpenses.map((expense) => (
                 <Card
                   key={expense.id}
-                  className="rounded-2xl cursor-pointer hover:border-primary/20 transition-colors"
+                  className="rounded-2xl cursor-pointer hover:border-gray-300 transition-colors"
                   onClick={() => handleExpenseClick(expense)}
                 >
                   <CardContent className="p-4 flex items-center gap-4">
@@ -231,7 +231,7 @@ const Expenses = () => {
           
           {loadingDetails ? (
             <div className="px-4 py-6 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
             </div>
           ) : selectedExpense ? (
             <div className="px-4 py-6 overflow-y-auto">
@@ -265,7 +265,7 @@ const Expenses = () => {
                       <Card key={share.userId} className="rounded-2xl">
                         <CardContent className="p-3 flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                            <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-semibold">
                               {share.initial}
                             </div>
                             <div>
