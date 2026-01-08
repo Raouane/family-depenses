@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "build:all": "npm install && npx vite build && cd backend && npm install && npm run build"
+    "build:all": "npm install && npm run build && cd backend && npm install && npm run build"
   },
   "dependencies": {
     "react": "^18.2.0",

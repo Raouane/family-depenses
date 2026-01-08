@@ -14,7 +14,7 @@ import {
 const router = express.Router()
 
 // Validation middleware
-const validate = (req, res, next) => {
+const validate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() })
@@ -30,7 +30,7 @@ router.get(
   '/:groupId/summary',
   [param('groupId').isUUID().withMessage('Invalid group ID')],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { groupId } = req.params
       const summary = await getGroupSummary(groupId)
@@ -67,7 +67,7 @@ router.get(
     query('search').optional().isString().trim(),
   ],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { groupId } = req.params
       const search = req.query.search as string | undefined
@@ -103,7 +103,7 @@ router.get(
  */
 router.get(
   '/',
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       // TODO: Get userId from auth/session
       const userId = '550e8400-e29b-41d4-a716-446655440000' // Mohamed
@@ -132,7 +132,7 @@ router.get(
   '/:groupId',
   [param('groupId').isUUID().withMessage('Invalid group ID')],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { groupId } = req.params
       const group = await getGroupById(groupId)
@@ -172,7 +172,7 @@ router.post(
     body('description').optional().isString().trim(),
   ],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       // TODO: Get userId from auth/session
       const userId = '550e8400-e29b-41d4-a716-446655440000' // Mohamed
@@ -206,7 +206,7 @@ router.post(
     body('userId').isUUID().withMessage('Invalid user ID'),
   ],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { groupId } = req.params
       const { userId } = req.body
@@ -231,7 +231,7 @@ router.delete(
     param('userId').isUUID().withMessage('Invalid user ID'),
   ],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { groupId, userId } = req.params
       

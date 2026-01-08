@@ -29,14 +29,14 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
     ]
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // En développement, autoriser les requêtes sans origin (Postman, etc.)
     if (!origin && process.env.NODE_ENV === 'development') {
       return callback(null, true)
     }
     
     // Vérifier si l'origin est autorisé
-    if (allowedOrigins.some(allowed => {
+    if (origin && allowedOrigins.some(allowed => {
       if (typeof allowed === 'string') {
         return allowed === origin
       }

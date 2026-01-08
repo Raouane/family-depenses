@@ -5,7 +5,7 @@ import { createExpense, getExpenseById } from '../db/queries.js'
 const router = express.Router()
 
 // Validation middleware
-const validate = (req, res, next) => {
+const validate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() })
@@ -21,7 +21,7 @@ router.get(
   '/:id',
   [param('id').isUUID().withMessage('Invalid expense ID')],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { id } = req.params
       const expense = await getExpenseById(id)
@@ -75,7 +75,7 @@ router.post(
     body('participantIds.*').isUUID().withMessage('Invalid participant ID'),
   ],
   validate,
-  async (req, res, next) => {
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const {
         groupId,
