@@ -30,6 +30,12 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 app.use(cors({
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // En production, si le frontend et le backend sont sur le même domaine,
+    // les requêtes same-origin n'ont pas d'header Origin - les autoriser
+    if (!origin && isProduction) {
+      return callback(null, true)
+    }
+    
     // En développement, autoriser les requêtes sans origin (Postman, etc.)
     if (!origin && process.env.NODE_ENV === 'development') {
       return callback(null, true)
