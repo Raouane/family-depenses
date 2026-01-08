@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+// En production, utiliser l'URL relative (même domaine)
+// En développement, utiliser l'URL du backend local
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.PROD ? '/api' : 'http://localhost:3000/api')
 
 /**
  * Generic API request function
