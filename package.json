@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npx vite build",
     "preview": "vite preview",
-    "build:all": "npm install --include=dev && npm run build && cd backend && npm install && npm run build"
+    "build:all": "npm install --include=dev && npm run build && cd backend && NPM_CONFIG_PRODUCTION=false npm install && npm run build"
   },
   "dependencies": {
     "react": "^18.2.0",
