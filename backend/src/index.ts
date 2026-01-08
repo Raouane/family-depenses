@@ -1,13 +1,19 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import routes from './routes/index.js'
 
 dotenv.config()
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const app = express()
 const PORT = process.env.PORT || 3000
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
+const isProduction = process.env.NODE_ENV === 'production'
 
 // Middleware
 // En développement, accepter tous les ports locaux (5173, 5174, etc.)
@@ -49,13 +55,31 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Routes
+// Routes API
 app.use('/api', routes)
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'FamilySplit API is running' })
 })
+
+// En production, servir les fichiers statiques du frontend
+if (isProduction) {
+  // Chemin vers le dossier dist du frontend (un niveau au-dessus du backend)
+  const frontendDistPath = path.join(__dirname, '../../dist')
+  
+  // Servir les fichiers statiques
+  app.use(express.static(frontendDistPath))
+  
+  // Pour toutes les routes non-API, servir index.html (SPA routing)
+  app.get('*', (req, res) => {
+    // Ne pas intercepter les routes API
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'Route not found' })
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'))
+  })
+}
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -66,10 +90,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   })
 })
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' })
-})
+// 404 handler pour les routes API (seulement en développement ou si ce n'est pas une route frontend)
+if (!isProduction) {
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' })
+  })
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`)
