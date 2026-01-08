@@ -1,0 +1,15 @@
+# Variables d'environnement pour Render - Web Service
+# Collez ce contenu dans Render → Web Service → Environment → "Add from .env"
+
+# Frontend (VITE_* - utilisées pendant le BUILD)
+VITE_API_URL=https://family-depenses.onrender.com/api
+VITE_SUPABASE_URL=https://lqdfioptcptinnxqshrj.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZGZpb3B0Y3B0aW5ueHFzaHJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MTgwMjgsImV4cCI6MjA4MzM5NDAyOH0.SfMxrn6f3cj3XSSwM_EjU1VKP9PDWt1Ur31kwMIUFuA
+
+# Backend
+DATABASE_URL=postgresql://postgres.lqdfioptcptinnxqshrj:Papa1930%2AMaman1951%2A@aws-1-eu-west-1.pooler.supabase.com:5432/postgres
+PORT=3000
+NODE_ENV=production
+FRONTEND_URL=https://family-depenses.onrender.com
+SUPABASE_URL=https://lqdfioptcptinnxqshrj.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZGZpb3B0Y3B0aW5ueHFzaHJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzgxODAyOCwiZXhwIjoyMDgzMzk0MDI4fQ.66x4iNocWcP8WUn6Cl3jIXaC0DrCUqt5nrqb9Qr4dZs

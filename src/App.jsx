@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { GroupProvider } from './context/GroupContext'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Home from './pages/Home'
 import Expenses from './pages/Expenses'
 import Groups from './pages/Groups'
@@ -56,11 +58,13 @@ function LoginRoute() {
 function AppRoutes() {
   const { user, loading } = useAuth()
 
-  // Si l'utilisateur n'est pas connecté, afficher uniquement Login
+  // Si l'utilisateur n'est pas connecté, afficher uniquement Login et pages de réinitialisation
   if (!loading && !user) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     )

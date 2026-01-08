@@ -1,0 +1,6 @@
+DATABASE_URL=postgresql://postgres.lqdfioptcptinnxqshrj:Papa1930%2AMaman1951%2A@aws-1-eu-west-1.pooler.supabase.com:5432/postgres
+FRONTEND_URL=https://family-depenses.onrender.com
+NODE_ENV=production
+PORT=3000
+VITE_API_URL=https://family-depenses.onrender.com/api
+JWT_SECRET=7b819a976f3a8d8d5fafe14d251152408f40b316ef4165f1a56bbb68deca6bb3b6f9b73528e0301021f2a20cbed22b5dd580aceed258622f4d16dbdec37b6bbd

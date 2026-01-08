@@ -7,8 +7,10 @@ const Layout = ({ children }) => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   
-  // Ne pas afficher la navigation sur la page de login
-  if (location.pathname === '/login') {
+  // Ne pas afficher la navigation sur les pages d'authentification
+  if (location.pathname === '/login' || 
+      location.pathname === '/forgot-password' || 
+      location.pathname === '/reset-password') {
     return <>{children}</>
   }
 
