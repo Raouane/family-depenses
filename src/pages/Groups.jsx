@@ -263,9 +263,9 @@ const Groups = () => {
               <div className="mb-6">
                 <h3 className="text-xl font-semibold mb-2">{selectedGroup.name}</h3>
                 {selectedGroup.description && (
-                  <p className="text-muted-foreground">{selectedGroup.description}</p>
+                  <p className="text-gray-700">{selectedGroup.description}</p>
                 )}
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-sm text-gray-700 mt-2">
                   Créé le {new Date(selectedGroup.createdAt).toLocaleDateString('fr-FR')}
                 </p>
               </div>
