@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Home, DollarSign, Users, User, History } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import Notifications from './Notifications'
+import Notifications from './Notifications.jsx'
 
 const Layout = ({ children }) => {
   const location = useLocation()
