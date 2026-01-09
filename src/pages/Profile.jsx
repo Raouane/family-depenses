@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { getUserProfile, updateUserProfile } from '@/services/users'
 import { useAuth } from '@/context/AuthContext'
+import LogoutButton from '@/components/LogoutButton'
 
 const Profile = () => {
-  const { user: currentUser, logout } = useAuth()
+  const { user: currentUser } = useAuth()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -19,6 +21,8 @@ const Profile = () => {
     email: '',
     initial: '',
   })
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const [updatingNotifications, setUpdatingNotifications] = useState(false)
 
   useEffect(() => {
     if (currentUser) {
@@ -39,6 +43,7 @@ const Profile = () => {
         email: data.email,
         initial: data.initial,
       })
+      setNotificationsEnabled(data.notifications_enabled ?? true)
     } catch (err) {
       console.error('Error loading profile:', err)
       setError(err.message || 'Erreur lors du chargement du profil')
@@ -91,6 +96,29 @@ const Profile = () => {
     }
     setEditing(false)
     setError(null)
+  }
+
+  const handleToggleNotifications = async (checked) => {
+    if (!currentUser) return
+    
+    try {
+      setUpdatingNotifications(true)
+      const updated = await updateUserProfile(currentUser.id, {
+        notifications_enabled: checked
+      })
+      setNotificationsEnabled(updated.notifications_enabled ?? true)
+      // Mettre à jour l'utilisateur local aussi
+      if (user) {
+        setUser({ ...user, notifications_enabled: updated.notifications_enabled ?? true })
+      }
+    } catch (err) {
+      console.error('Error updating notifications preference:', err)
+      setError(err.message || 'Erreur lors de la mise à jour des préférences')
+      // Revenir à l'état précédent en cas d'erreur
+      setNotificationsEnabled(!checked)
+    } finally {
+      setUpdatingNotifications(false)
+    }
   }
 
   if (loading) {
@@ -249,22 +277,52 @@ const Profile = () => {
           <CardTitle className="text-gray-800">Paramètres</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">Notifications</h4>
-              <p className="text-sm text-gray-700">
-                Recevoir des notifications pour les nouvelles dépenses
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium">Notifications</h4>
+                <p className="text-sm text-gray-700">
+                  Recevoir des notifications pour les nouvelles dépenses
+                </p>
+              </div>
+              <Switch
+                checked={notificationsEnabled}
+                onCheckedChange={handleToggleNotifications}
+                disabled={updatingNotifications}
+              />
+            </div>
+            <div className={`p-3 rounded-lg border ${
+              notificationsEnabled 
+                ? 'bg-green-50 border-green-200' 
+                : 'bg-gray-50 border-gray-200'
+            }`}>
+              <p className={`text-sm font-medium ${
+                notificationsEnabled 
+                  ? 'text-green-800' 
+                  : 'text-gray-700'
+              }`}>
+                {notificationsEnabled ? (
+                  <>
+                    ✅ <strong>Notifications activées</strong> - Vous recevrez des notifications pour les nouvelles dépenses ajoutées dans vos groupes.
+                  </>
+                ) : (
+                  <>
+                    🔕 <strong>Notifications désactivées</strong> - Vous ne recevrez aucune notification pour les nouvelles dépenses.
+                  </>
+                )}
               </p>
             </div>
-            <Button variant="outline" size="sm" disabled>
-              Bientôt disponible
-            </Button>
           </div>
           <div className="pt-4 border-t">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div>
-              <h4 className="font-semibold text-base text-foreground">Version</h4>
-              <p className="text-base text-slate-700 mt-1 font-medium">1.0.0</p>
+                <h4 className="font-semibold text-base text-foreground">Version</h4>
+                <p className="text-base text-slate-700 mt-1 font-medium">1.0.0</p>
+              </div>
+            </div>
+            <div className="pt-4 border-t">
+              <div className="w-full">
+                <LogoutButton />
               </div>
             </div>
           </div>

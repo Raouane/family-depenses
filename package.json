@@ -10,6 +10,7 @@
     "build:all": "npm install --include=dev && npm run build && cd backend && NPM_CONFIG_PRODUCTION=false npm install && npm run build"
   },
   "dependencies": {
+    "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",

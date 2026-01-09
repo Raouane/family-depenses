@@ -37,6 +37,7 @@ router.get(
         name: user.name,
         email: user.email,
         initial: user.initial,
+        notifications_enabled: user.notifications_enabled ?? true,
         createdAt: user.created_at.toISOString(),
       })
     } catch (error: any) {
@@ -57,20 +58,22 @@ router.put(
     body('name').optional().trim().isLength({ min: 1, max: 100 }),
     body('email').optional().isEmail(),
     body('initial').optional().isLength({ min: 1, max: 1 }),
+    body('notifications_enabled').optional().isBoolean(),
   ],
   validate,
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
       const { userId } = req.params
-      const { name, email, initial } = req.body
+      const { name, email, initial, notifications_enabled } = req.body
       
-      const user = await updateUser(userId, { name, email, initial })
+      const user = await updateUser(userId, { name, email, initial, notifications_enabled })
       
       res.json({
         id: user.id,
         name: user.name,
         email: user.email,
         initial: user.initial,
+        notifications_enabled: user.notifications_enabled ?? true,
         createdAt: user.created_at.toISOString(),
         updatedAt: user.updated_at.toISOString(),
       })

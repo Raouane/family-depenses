@@ -464,6 +464,7 @@ export async function updateUser(userId: string, data: {
   name?: string
   email?: string
   initial?: string
+  notifications_enabled?: boolean
 }) {
   const updates: string[] = []
   const values: any[] = []
@@ -481,6 +482,10 @@ export async function updateUser(userId: string, data: {
     updates.push(`initial = $${paramIndex++}`)
     values.push(data.initial)
   }
+  if (data.notifications_enabled !== undefined) {
+    updates.push(`notifications_enabled = $${paramIndex++}`)
+    values.push(data.notifications_enabled)
+  }
   
   if (updates.length === 0) {
     return getUserById(userId)
@@ -489,20 +494,32 @@ export async function updateUser(userId: string, data: {
   updates.push(`updated_at = CURRENT_TIMESTAMP`)
   values.push(userId)
   
-  const result = await pool.query(
-    `
-    UPDATE users
-    SET ${updates.join(', ')}
-    WHERE id = $${paramIndex}
-    RETURNING *
-    `,
-    values
-  )
-  
-  return {
-    ...result.rows[0],
-    created_at: new Date(result.rows[0].created_at),
-    updated_at: new Date(result.rows[0].updated_at),
+  try {
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET ${updates.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING *
+      `,
+      values
+    )
+    
+    if (result.rows.length === 0) {
+      throw new Error('User not found')
+    }
+    
+    return {
+      ...result.rows[0],
+      created_at: new Date(result.rows[0].created_at),
+      updated_at: new Date(result.rows[0].updated_at),
+    }
+  } catch (error: any) {
+    // Vérifier si l'erreur est due à une colonne manquante
+    if (error.message && error.message.includes('notifications_enabled')) {
+      throw new Error('La colonne notifications_enabled n\'existe pas. Veuillez exécuter la migration SQL: database/migration_add_notifications_preferences.sql dans Supabase SQL Editor.')
+    }
+    throw error
   }
 }
 
