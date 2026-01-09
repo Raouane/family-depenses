@@ -11,11 +11,14 @@ import { getGroupSummary } from '@/services/groups'
 import { createSettlement } from '@/services/settlements'
 import { useGroup } from '@/context/GroupContext'
 import { useAuth } from '@/context/AuthContext'
+import { useCurrency } from '@/context/CurrencyContext'
+import CurrencySwitch from '@/components/CurrencySwitch'
 
 const Home = () => {
   const navigate = useNavigate()
   const { currentGroupId } = useGroup()
   const { user: currentUser } = useAuth()
+  const { displayCurrency, convertAmount, formatAmount } = useCurrency()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [userBalance, setUserBalance] = useState(0)
@@ -37,7 +40,7 @@ const Home = () => {
       setLoading(false)
       setError('Aucun groupe sélectionné. Veuillez sélectionner un groupe dans la page Groupes.')
     }
-  }, [currentGroupId])
+  }, [currentGroupId, displayCurrency])
 
   const loadSummary = async () => {
     if (!currentGroupId || !currentUser) return
@@ -233,7 +236,9 @@ const Home = () => {
     setSelectedBrother(brother)
     // Utiliser le solde absolu actuel comme montant suggéré
     // L'utilisateur peut modifier ce montant s'il veut payer partiellement
-    const suggestedAmount = Math.abs(brother.balance || brother.amount)
+    // Convertir le montant suggéré dans la devise d'affichage pour l'input
+    const suggestedAmountEUR = Math.abs(brother.balance || brother.amount)
+    const suggestedAmount = convertAmount(suggestedAmountEUR, 'EUR', displayCurrency)
     setSettlementAmount(suggestedAmount.toFixed(2))
     setPaymentMethod('cash')
     setSettlementNotes('')
@@ -263,14 +268,19 @@ const Home = () => {
 
       // Valider que le montant ne dépasse pas le solde actuel
       const settlementAmountNum = parseFloat(settlementAmount)
-      const maxAmount = Math.abs(selectedBrother.balance || selectedBrother.amount)
+      // Convertir le montant saisi (peut être en TND) en EUR pour le stockage
+      const settlementAmountEUR = displayCurrency === 'TND' 
+        ? convertAmount(settlementAmountNum, 'TND', 'EUR')
+        : settlementAmountNum
+      const maxAmountEUR = Math.abs(selectedBrother.balance || selectedBrother.amount)
       
       if (settlementAmountNum <= 0) {
         throw new Error('Le montant doit être supérieur à 0')
       }
       
-      if (settlementAmountNum > maxAmount) {
-        const confirmMessage = `Le montant (${settlementAmountNum.toFixed(2)} €) dépasse le solde actuel (${maxAmount.toFixed(2)} €). Voulez-vous continuer ?`
+      if (settlementAmountEUR > maxAmountEUR) {
+        const maxAmountDisplay = convertAmount(maxAmountEUR, 'EUR', displayCurrency)
+        const confirmMessage = `Le montant (${formatAmount(settlementAmountNum, displayCurrency)}) dépasse le solde actuel (${formatAmount(maxAmountDisplay, displayCurrency)}). Voulez-vous continuer ?`
         if (!window.confirm(confirmMessage)) {
           return
         }
@@ -280,7 +290,7 @@ const Home = () => {
         groupId: currentGroupId,
         fromUserId,
         toUserId,
-        amount: settlementAmountNum,
+        amount: settlementAmountEUR, // Toujours stocker en EUR
         paymentMethod,
         notes: settlementNotes || null,
       })
@@ -335,10 +345,15 @@ const Home = () => {
     <div className="px-4 py-6 pb-24">
       {/* En-tête */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">
-          Salut {currentUser?.name || 'Utilisateur'} 👋
-        </h1>
-        <p className="text-base text-slate-700 mt-2 font-medium">Voici votre résumé financier</p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Salut {currentUser?.name || 'Utilisateur'} 👋
+            </h1>
+            <p className="text-base text-slate-700 mt-2 font-medium">Voici votre résumé financier</p>
+          </div>
+          <CurrencySwitch />
+        </div>
       </div>
 
       {/* Carte solde personnel */}
@@ -358,10 +373,7 @@ const Home = () => {
               : 'Votre solde'}
           </div>
           <div className="text-white text-5xl font-bold mb-3">
-            {Math.abs(userBalance).toLocaleString('fr-FR', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })} €
+            {formatAmount(Math.abs(convertAmount(userBalance, 'EUR', displayCurrency)), displayCurrency)}
           </div>
           <div className="text-white text-sm font-medium">
             {userBalanceStatus === 'settled' 
@@ -453,10 +465,7 @@ const Home = () => {
                       }`}
                     >
                       {brother.type === 'receive' ? '+' : '-'}
-                      {brother.amount.toLocaleString('fr-FR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      })} €
+                      {formatAmount(convertAmount(brother.amount, 'EUR', displayCurrency), displayCurrency)}
                     </div>
                   </div>
                   
@@ -501,15 +510,15 @@ const Home = () => {
               {selectedBrother && (
                 <>
                   {userBalanceStatus === 'pay' 
-                    ? `Vous allez enregistrer que vous avez payé ${selectedBrother.amount.toFixed(2)} € à ${selectedBrother.name}`
-                    : `Vous allez enregistrer que ${selectedBrother.name} vous a payé ${selectedBrother.amount.toFixed(2)} €`}
+                    ? `Vous allez enregistrer que vous avez payé ${formatAmount(convertAmount(selectedBrother.amount, 'EUR', displayCurrency), displayCurrency)} à ${selectedBrother.name}`
+                    : `Vous allez enregistrer que ${selectedBrother.name} vous a payé ${formatAmount(convertAmount(selectedBrother.amount, 'EUR', displayCurrency), displayCurrency)}`}
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="amount">Montant (€)</Label>
+              <Label htmlFor="amount">Montant ({displayCurrency === 'EUR' ? '€' : 'TND'})</Label>
               <Input
                 id="amount"
                 type="number"
@@ -525,8 +534,8 @@ const Home = () => {
               />
               {selectedBrother && (
                 <p className="text-xs text-gray-500">
-                  Solde actuel : {Math.abs(selectedBrother.balance || selectedBrother.amount).toFixed(2)} €
-                  {parseFloat(settlementAmount) > Math.abs(selectedBrother.balance || selectedBrother.amount) && (
+                  Solde actuel : {formatAmount(convertAmount(Math.abs(selectedBrother.balance || selectedBrother.amount), 'EUR', displayCurrency), displayCurrency)}
+                  {parseFloat(settlementAmount) > convertAmount(Math.abs(selectedBrother.balance || selectedBrother.amount), 'EUR', displayCurrency) && (
                     <span className="text-red-500 ml-2">⚠️ Montant supérieur au solde</span>
                   )}
                 </p>

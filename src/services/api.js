@@ -42,7 +42,19 @@ async function request(endpoint, options = {}) {
 
     return await response.json()
   } catch (error) {
-    console.error('API request failed:', error)
+    // Ne pas logger les erreurs de connexion (backend non démarré)
+    // pour éviter le spam dans la console
+    if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_REFUSED'))) {
+      // Créer une erreur personnalisée pour que les composants puissent la détecter
+      const connectionError = new Error('Backend non disponible')
+      connectionError.isConnectionError = true
+      throw connectionError
+    }
+    
+    // Logger uniquement les autres erreurs
+    if (!error.message || !error.message.includes('Token manquant')) {
+      console.error('API request failed:', error)
+    }
     throw error
   }
 }

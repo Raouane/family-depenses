@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GroupProvider } from './context/GroupContext'
+import { CurrencyProvider } from './context/CurrencyContext'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
@@ -137,9 +138,11 @@ function App() {
     >
       <AuthProvider>
         <GroupProvider>
-          <Layout>
-            <AppRoutes />
-          </Layout>
+          <CurrencyProvider>
+            <Layout>
+              <AppRoutes />
+            </Layout>
+          </CurrencyProvider>
         </GroupProvider>
       </AuthProvider>
     </Router>

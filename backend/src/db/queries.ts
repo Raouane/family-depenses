@@ -793,3 +793,28 @@ export async function deleteSettlement(settlementId: string, userId: string): Pr
 
   return result.rows.length > 0
 }
+
+/**
+ * Get a setting by key
+ */
+export async function getSetting(key: string) {
+  const result = await pool.query(
+    'SELECT * FROM settings WHERE key = $1',
+    [key]
+  )
+  return result.rows[0] || null
+}
+
+/**
+ * Update a setting value
+ */
+export async function updateSetting(key: string, value: string) {
+  const result = await pool.query(
+    `UPDATE settings 
+     SET value = $1, updated_at = CURRENT_TIMESTAMP 
+     WHERE key = $2 
+     RETURNING *`,
+    [value, key]
+  )
+  return result.rows[0]
+}

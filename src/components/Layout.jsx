@@ -3,6 +3,7 @@ import { Home, DollarSign, Users, User, History } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Notifications from './Notifications'
 import InstallPrompt from './InstallPrompt'
+import CurrencyRateBar from './CurrencyRateBar'
 
 const Layout = ({ children }) => {
   const location = useLocation()
@@ -29,6 +30,8 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20 safe-area-bottom">
       <main className="max-w-md mx-auto bg-white min-h-screen">
+        {/* Barre de taux de change */}
+        {isAuthenticated && <CurrencyRateBar />}
         {/* En-tête avec notifications */}
         {isAuthenticated && (
           <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">

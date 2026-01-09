@@ -10,12 +10,15 @@ import { createExpense } from '@/services/expenses'
 import { getGroupUsers } from '@/services/groups'
 import { useGroup } from '@/context/GroupContext'
 import { useAuth } from '@/context/AuthContext'
+import { useCurrency } from '@/context/CurrencyContext'
 
 const AddExpense = () => {
   const navigate = useNavigate()
   const { currentGroupId } = useGroup()
   const { user: currentUser } = useAuth()
+  const { convertAmount, formatAmount } = useCurrency()
   const [amount, setAmount] = useState('0.00')
+  const [inputCurrency, setInputCurrency] = useState('EUR')
   const [title, setTitle] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [paidBy, setPaidBy] = useState('')
@@ -81,7 +84,9 @@ const AddExpense = () => {
 
   const selectedCount = Object.values(sharedWith).filter(Boolean).length
   const amountNum = parseFloat(amount.replace(',', '.')) || 0
-  const shareAmount = selectedCount > 0 ? amountNum / selectedCount : 0
+  // Convertir en EUR pour le calcul des parts (toujours stocké en EUR)
+  const amountInEUR = inputCurrency === 'TND' ? convertAmount(amountNum, 'TND', 'EUR') : amountNum
+  const shareAmount = selectedCount > 0 ? amountInEUR / selectedCount : 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -116,10 +121,13 @@ const AddExpense = () => {
       setLoading(true)
       setError(null)
       
+      // Convertir en EUR si la saisie était en TND
+      const amountInEUR = inputCurrency === 'TND' ? convertAmount(amountNum, 'TND', 'EUR') : amountNum
+      
       const expenseData = {
         groupId: currentGroupId,
         title: title.trim(),
-        amount: amountNum,
+        amount: amountInEUR, // Toujours stocker en EUR
         date: date,
         paidByUserId: paidBy,
         participantIds: participantIds,
@@ -156,6 +164,31 @@ const AddExpense = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="px-4 py-6">
+        {/* Sélecteur de devise */}
+        <div className="mb-4">
+          <label className="block text-base font-semibold text-foreground mb-3">
+            Devise
+          </label>
+          <div className="flex items-center gap-4">
+            <Button
+              type="button"
+              variant={inputCurrency === 'EUR' ? 'default' : 'outline'}
+              onClick={() => setInputCurrency('EUR')}
+              className="flex-1 rounded-2xl"
+            >
+              EUR (€)
+            </Button>
+            <Button
+              type="button"
+              variant={inputCurrency === 'TND' ? 'default' : 'outline'}
+              onClick={() => setInputCurrency('TND')}
+              className="flex-1 rounded-2xl"
+            >
+              TND
+            </Button>
+          </div>
+        </div>
+
         {/* Champ montant très large */}
         <div className="mb-8">
           <Input
@@ -165,7 +198,15 @@ const AddExpense = () => {
             placeholder="0.00"
             className="w-full text-5xl font-bold text-center border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 h-auto py-0"
           />
-          <div className="text-center text-gray-700 text-lg mt-2">€</div>
+          <div className="text-center text-gray-700 text-lg mt-2">
+            {inputCurrency === 'EUR' ? '€' : 'TND'}
+          </div>
+          {/* Afficher la conversion en temps réel si TND */}
+          {inputCurrency === 'TND' && amountNum > 0 && (
+            <div className="text-center text-gray-500 text-sm mt-1">
+              = {formatAmount(convertAmount(amountNum, 'TND', 'EUR'), 'EUR')}
+            </div>
+          )}
         </div>
 
         {/* Formulaire */}
@@ -272,10 +313,7 @@ const AddExpense = () => {
                       <div className="text-base text-slate-700 font-medium">
                         Sa part :{' '}
                         <span className="font-bold text-foreground text-lg">
-                          {shareAmount.toLocaleString('fr-FR', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })} €
+                          {formatAmount(shareAmount, 'EUR')}
                         </span>
                       </div>
                     </div>

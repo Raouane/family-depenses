@@ -103,7 +103,20 @@ if (!isProduction) {
   })
 }
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`)
   console.log(`📡 API available at http://localhost:${PORT}/api`)
+})
+
+server.on('error', (err: any) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Le port ${PORT} est déjà utilisé.`)
+    console.error(`💡 Solutions:`)
+    console.error(`   1. Arrêter le processus qui utilise le port: netstat -ano | findstr :${PORT}`)
+    console.error(`   2. Utiliser un autre port: définir PORT=3001 dans backend/.env`)
+    console.error(`   3. Tuer tous les processus Node: taskkill /F /IM node.exe`)
+    process.exit(1)
+  } else {
+    throw err
+  }
 })

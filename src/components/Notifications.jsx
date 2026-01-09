@@ -13,6 +13,7 @@ const Notifications = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [markingAll, setMarkingAll] = useState(false)
+  const [backendAvailable, setBackendAvailable] = useState(true)
 
   useEffect(() => {
     if (user && open) {
@@ -21,20 +22,30 @@ const Notifications = () => {
   }, [user, open])
 
   useEffect(() => {
-    if (user) {
+    if (user && backendAvailable) {
       loadUnreadCount()
-      // Rafraîchir le compteur toutes les 30 secondes
-      const interval = setInterval(loadUnreadCount, 30000)
+      // Rafraîchir le compteur toutes les 30 secondes seulement si le backend est disponible
+      const interval = setInterval(() => {
+        if (backendAvailable) {
+          loadUnreadCount()
+        }
+      }, 30000)
       return () => clearInterval(interval)
     }
-  }, [user])
+  }, [user, backendAvailable])
 
   const loadNotifications = async () => {
     try {
       setLoading(true)
       const data = await getNotifications(50)
       setNotifications(data)
+      setBackendAvailable(true)
     } catch (err) {
+      // Ne pas logger les erreurs de connexion
+      if (err.isConnectionError || (err.message && (err.message.includes('Failed to fetch') || err.message.includes('ERR_CONNECTION_REFUSED') || err.message.includes('Backend non disponible')))) {
+        setBackendAvailable(false)
+        return
+      }
       console.error('Error loading notifications:', err)
     } finally {
       setLoading(false)
@@ -45,8 +56,17 @@ const Notifications = () => {
     try {
       const count = await getUnreadCount()
       setUnreadCount(count)
+      setBackendAvailable(true) // Backend est disponible
     } catch (err) {
+      // Ne pas logger les erreurs de connexion (backend non démarré)
+      if (err.isConnectionError || (err.message && (err.message.includes('Failed to fetch') || err.message.includes('ERR_CONNECTION_REFUSED') || err.message.includes('Backend non disponible')))) {
+        setBackendAvailable(false) // Marquer le backend comme indisponible
+        // Ne pas logger pour éviter le spam
+        return
+      }
+      // Pour les autres erreurs (401, 500, etc.), on peut logger
       console.error('Error loading unread count:', err)
+      setBackendAvailable(true) // Garder le backend comme disponible pour les erreurs d'auth
     }
   }
 

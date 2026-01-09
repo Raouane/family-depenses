@@ -8,10 +8,12 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@
 import { getGroupExpenses } from '@/services/groups'
 import { getExpenseById } from '@/services/expenses'
 import { useGroup } from '@/context/GroupContext'
+import { useCurrency } from '@/context/CurrencyContext'
 
 const Expenses = () => {
   const navigate = useNavigate()
   const { currentGroupId } = useGroup()
+  const { displayCurrency, convertAmount, formatAmount } = useCurrency()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedExpense, setSelectedExpense] = useState(null)
   const [expenses, setExpenses] = useState([])
@@ -26,7 +28,7 @@ const Expenses = () => {
       setLoading(false)
       setError('Aucun groupe sélectionné')
     }
-  }, [searchQuery, currentGroupId])
+  }, [searchQuery, currentGroupId, displayCurrency])
 
   const loadExpenses = async () => {
     if (!currentGroupId) return
@@ -207,10 +209,7 @@ const Expenses = () => {
 
                   {/* Prix */}
                   <div className="text-xl font-bold text-foreground">
-                    {expense.amount.toLocaleString('fr-FR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })} €
+                    {formatAmount(convertAmount(expense.amount, 'EUR', displayCurrency), displayCurrency)}
                   </div>
                   </CardContent>
                 </Card>
@@ -248,10 +247,7 @@ const Expenses = () => {
                   })}
                 </div>
                 <div className="text-2xl font-bold mt-2">
-                  {selectedExpense.amount.toLocaleString('fr-FR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                  })} €
+                  {formatAmount(convertAmount(selectedExpense.amount, 'EUR', displayCurrency), displayCurrency)}
                 </div>
               </div>
 
@@ -280,10 +276,7 @@ const Expenses = () => {
                             </div>
                           </div>
                           <div className="text-xl font-bold text-foreground">
-                            {share.amount.toLocaleString('fr-FR', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2
-                            })} €
+                            {formatAmount(convertAmount(share.amount, 'EUR', displayCurrency), displayCurrency)}
                           </div>
                         </CardContent>
                       </Card>
