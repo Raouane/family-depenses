@@ -10,6 +10,7 @@ import Expenses from './pages/Expenses'
 import Groups from './pages/Groups'
 import Profile from './pages/Profile'
 import AddExpense from './pages/AddExpense'
+import Settlements from './pages/Settlements'
 
 // Composant pour protéger les routes
 function ProtectedRoute({ children }) {
@@ -110,6 +111,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AddExpense />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settlements"
+        element={
+          <ProtectedRoute>
+            <Settlements />
           </ProtectedRoute>
         }
       />

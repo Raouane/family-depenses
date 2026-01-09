@@ -47,6 +47,7 @@ export async function getGroupSummary(groupId: string): Promise<GroupSummary[]> 
     total_balance: parseFloat(row.total_balance),
     user_id: row.user_id,
     user_name: row.user_name,
+    user_email: row.user_email,
     user_initial: row.user_initial,
     balance: parseFloat(row.balance),
     status: row.status,
@@ -379,6 +380,54 @@ export async function removeUserFromGroup(groupId: string, userId: string) {
 }
 
 /**
+ * Update group
+ */
+export async function updateGroup(groupId: string, data: {
+  name?: string
+  description?: string
+}) {
+  const updates: string[] = []
+  const values: any[] = []
+  let paramIndex = 1
+  
+  if (data.name !== undefined) {
+    updates.push(`name = $${paramIndex++}`)
+    values.push(data.name)
+  }
+  if (data.description !== undefined) {
+    updates.push(`description = $${paramIndex++}`)
+    values.push(data.description === '' ? null : data.description)
+  }
+  
+  if (updates.length === 0) {
+    return getGroupById(groupId)
+  }
+  
+  updates.push(`updated_at = CURRENT_TIMESTAMP`)
+  values.push(groupId)
+  
+  const result = await pool.query(
+    `
+    UPDATE groups
+    SET ${updates.join(', ')}
+    WHERE id = $${paramIndex}
+    RETURNING *
+    `,
+    values
+  )
+  
+  if (result.rows.length === 0) {
+    return null
+  }
+  
+  return {
+    ...result.rows[0],
+    created_at: new Date(result.rows[0].created_at),
+    updated_at: new Date(result.rows[0].updated_at),
+  }
+}
+
+/**
  * Get user by ID
  */
 export async function getUserById(userId: string) {
@@ -455,4 +504,275 @@ export async function updateUser(userId: string, data: {
     created_at: new Date(result.rows[0].created_at),
     updated_at: new Date(result.rows[0].updated_at),
   }
+}
+
+/**
+ * Notification interfaces
+ */
+export interface Notification {
+  id: string
+  user_id: string
+  group_id: string
+  type: 'expense_added' | 'expense_updated' | 'expense_deleted' | 'group_updated' | 'member_added' | 'member_removed'
+  title: string
+  message: string
+  related_expense_id: string | null
+  is_read: boolean
+  created_at: Date
+  group_name?: string
+}
+
+/**
+ * Create notifications for all group members (except the author)
+ */
+export async function createGroupNotification(
+  groupId: string,
+  authorUserId: string,
+  type: Notification['type'],
+  title: string,
+  message: string,
+  relatedExpenseId: string | null = null
+): Promise<void> {
+  try {
+    const result = await pool.query(
+      `SELECT create_group_notification($1, $2, $3, $4, $5, $6)`,
+      [groupId, authorUserId, type, title, message, relatedExpenseId]
+    )
+    console.log(`Notification créée pour le groupe ${groupId}, auteur: ${authorUserId}`)
+  } catch (error: any) {
+    console.error('Erreur lors de la création de la notification:', error.message)
+    // Vérifier si la fonction existe
+    if (error.message.includes('function') && error.message.includes('does not exist')) {
+      throw new Error('La fonction create_group_notification n\'existe pas dans la base de données. Exécutez database/migration_add_notifications.sql')
+    }
+    throw error
+  }
+}
+
+/**
+ * Get all notifications for a user
+ */
+export async function getUserNotifications(userId: string, limit: number = 50): Promise<Notification[]> {
+  const result = await pool.query(
+    `
+    SELECT 
+      n.*,
+      g.name as group_name
+    FROM notifications n
+    JOIN groups g ON n.group_id = g.id
+    WHERE n.user_id = $1
+    ORDER BY n.created_at DESC
+    LIMIT $2
+    `,
+    [userId, limit]
+  )
+  
+  return result.rows.map((row: any) => ({
+    id: row.id,
+    user_id: row.user_id,
+    group_id: row.group_id,
+    type: row.type,
+    title: row.title,
+    message: row.message,
+    related_expense_id: row.related_expense_id,
+    is_read: row.is_read,
+    created_at: new Date(row.created_at),
+    group_name: row.group_name,
+  }))
+}
+
+/**
+ * Get unread notifications count for a user
+ */
+export async function getUnreadNotificationsCount(userId: string): Promise<number> {
+  const result = await pool.query(
+    `SELECT COUNT(*) as count FROM notifications WHERE user_id = $1 AND is_read = FALSE`,
+    [userId]
+  )
+  return parseInt(result.rows[0].count)
+}
+
+/**
+ * Mark notification as read
+ */
+export async function markNotificationAsRead(notificationId: string, userId: string): Promise<void> {
+  await pool.query(
+    `UPDATE notifications SET is_read = TRUE WHERE id = $1 AND user_id = $2`,
+    [notificationId, userId]
+  )
+}
+
+/**
+ * Mark all notifications as read for a user
+ */
+export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+  await pool.query(
+    `UPDATE notifications SET is_read = TRUE WHERE user_id = $1 AND is_read = FALSE`,
+    [userId]
+  )
+}
+
+/**
+ * Settlement interfaces
+ */
+export interface Settlement {
+  id: string
+  group_id: string
+  from_user_id: string
+  to_user_id: string
+  amount: number
+  payment_method: string
+  notes: string | null
+  created_by_user_id: string
+  created_at: Date
+  from_user_name?: string
+  from_user_initial?: string
+  to_user_name?: string
+  to_user_initial?: string
+  created_by_name?: string
+}
+
+/**
+ * Create a new settlement
+ */
+export async function createSettlement(data: {
+  groupId: string
+  fromUserId: string
+  toUserId: string
+  amount: number
+  paymentMethod?: string
+  notes?: string
+  createdByUserId: string
+}): Promise<Settlement> {
+  const result = await pool.query(
+    `
+    INSERT INTO settlements (group_id, from_user_id, to_user_id, amount, payment_method, notes, created_by_user_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING *
+    `,
+    [
+      data.groupId,
+      data.fromUserId,
+      data.toUserId,
+      data.amount,
+      data.paymentMethod || 'cash',
+      data.notes || null,
+      data.createdByUserId,
+    ]
+  )
+
+  const settlement = result.rows[0]
+  return {
+    id: settlement.id,
+    group_id: settlement.group_id,
+    from_user_id: settlement.from_user_id,
+    to_user_id: settlement.to_user_id,
+    amount: parseFloat(settlement.amount),
+    payment_method: settlement.payment_method,
+    notes: settlement.notes,
+    created_by_user_id: settlement.created_by_user_id,
+    created_at: new Date(settlement.created_at),
+  }
+}
+
+/**
+ * Get all settlements for a group
+ */
+export async function getGroupSettlements(groupId: string): Promise<Settlement[]> {
+  const result = await pool.query(
+    `
+    SELECT 
+      s.*,
+      u1.name as from_user_name,
+      u1.initial as from_user_initial,
+      u2.name as to_user_name,
+      u2.initial as to_user_initial,
+      u3.name as created_by_name
+    FROM settlements s
+    JOIN users u1 ON s.from_user_id = u1.id
+    JOIN users u2 ON s.to_user_id = u2.id
+    JOIN users u3 ON s.created_by_user_id = u3.id
+    WHERE s.group_id = $1
+    ORDER BY s.created_at DESC
+    `,
+    [groupId]
+  )
+
+  return result.rows.map((row: any) => ({
+    id: row.id,
+    group_id: row.group_id,
+    from_user_id: row.from_user_id,
+    to_user_id: row.to_user_id,
+    amount: parseFloat(row.amount),
+    payment_method: row.payment_method,
+    notes: row.notes,
+    created_by_user_id: row.created_by_user_id,
+    created_at: new Date(row.created_at),
+    from_user_name: row.from_user_name,
+    from_user_initial: row.from_user_initial,
+    to_user_name: row.to_user_name,
+    to_user_initial: row.to_user_initial,
+    created_by_name: row.created_by_name,
+  }))
+}
+
+/**
+ * Get settlement by ID
+ */
+export async function getSettlementById(settlementId: string): Promise<Settlement | null> {
+  const result = await pool.query(
+    `
+    SELECT 
+      s.*,
+      u1.name as from_user_name,
+      u1.initial as from_user_initial,
+      u2.name as to_user_name,
+      u2.initial as to_user_initial,
+      u3.name as created_by_name
+    FROM settlements s
+    JOIN users u1 ON s.from_user_id = u1.id
+    JOIN users u2 ON s.to_user_id = u2.id
+    JOIN users u3 ON s.created_by_user_id = u3.id
+    WHERE s.id = $1
+    `,
+    [settlementId]
+  )
+
+  if (result.rows.length === 0) {
+    return null
+  }
+
+  const row = result.rows[0]
+  return {
+    id: row.id,
+    group_id: row.group_id,
+    from_user_id: row.from_user_id,
+    to_user_id: row.to_user_id,
+    amount: parseFloat(row.amount),
+    payment_method: row.payment_method,
+    notes: row.notes,
+    created_by_user_id: row.created_by_user_id,
+    created_at: new Date(row.created_at),
+    from_user_name: row.from_user_name,
+    from_user_initial: row.from_user_initial,
+    to_user_name: row.to_user_name,
+    to_user_initial: row.to_user_initial,
+    created_by_name: row.created_by_name,
+  }
+}
+
+/**
+ * Delete a settlement
+ */
+export async function deleteSettlement(settlementId: string, userId: string): Promise<boolean> {
+  const result = await pool.query(
+    `
+    DELETE FROM settlements
+    WHERE id = $1 AND created_by_user_id = $2
+    RETURNING *
+    `,
+    [settlementId, userId]
+  )
+
+  return result.rows.length > 0
 }

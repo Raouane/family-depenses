@@ -7,7 +7,12 @@ const { Pool } = pg
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // Supabase nécessite SSL même en développement
+  ssl: process.env.DATABASE_URL?.includes('supabase') 
+    ? { rejectUnauthorized: false } 
+    : process.env.NODE_ENV === 'production' 
+      ? { rejectUnauthorized: false } 
+      : false,
 })
 
 // Test connection

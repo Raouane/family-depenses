@@ -3,6 +3,8 @@ import groupsRouter from './groups.js'
 import expensesRouter from './expenses.js'
 import usersRouter from './users.js'
 import authRouter from './auth.js'
+import notificationsRouter from './notifications.js'
+import settlementsRouter from './settlements.js'
 
 const router = express.Router()
 
@@ -11,5 +13,7 @@ router.use('/auth', authRouter)
 router.use('/groups', groupsRouter)
 router.use('/expenses', expensesRouter)
 router.use('/users', usersRouter)
+router.use('/notifications', notificationsRouter)
+router.use('/settlements', settlementsRouter)
 
 export default router

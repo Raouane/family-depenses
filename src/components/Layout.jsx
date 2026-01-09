@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Home, DollarSign, Users, User } from 'lucide-react'
+import { Home, DollarSign, Users, User, History } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import Notifications from './Notifications'
 
 const Layout = ({ children }) => {
   const location = useLocation()
@@ -17,6 +18,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { path: '/', icon: Home, label: 'Accueil' },
     { path: '/expenses', icon: DollarSign, label: 'Dépenses' },
+    { path: '/settlements', icon: History, label: 'Paiements' },
     { path: '/groups', icon: Users, label: 'Groupes' },
     { path: '/profile', icon: User, label: 'Profil' },
   ]
@@ -26,6 +28,13 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20 safe-area-bottom">
       <main className="max-w-md mx-auto bg-white min-h-screen">
+        {/* En-tête avec notifications */}
+        {isAuthenticated && (
+          <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-900">FamilySplit</h1>
+            <Notifications />
+          </div>
+        )}
         {children}
       </main>
       
