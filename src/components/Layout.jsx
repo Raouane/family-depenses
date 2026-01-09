@@ -3,7 +3,6 @@ import { Home, DollarSign, Users, User, History } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Notifications from './Notifications'
 import InstallPrompt from './InstallPrompt'
-import InstallPrompt from './InstallPrompt'
 
 const Layout = ({ children }) => {
   const location = useLocation()
