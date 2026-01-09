@@ -34,7 +34,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 
     next()
   } catch (error: unknown) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+    if (error instanceof Error && (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError')) {
       return res.status(401).json({ error: 'Token invalide ou expiré' })
     }
     console.error('Error in authentication middleware:', error)

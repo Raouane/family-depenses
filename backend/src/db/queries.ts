@@ -43,7 +43,8 @@ export interface GroupSummary {
   total_balance: number
   user_id: string
   user_name: string
-  user_initial: string
+  user_email: string | null
+  user_initial: string | null
   balance: number
   status: 'receive' | 'pay' | 'settled'
 }
@@ -87,9 +88,9 @@ export async function getGroupSummary(groupId: string): Promise<GroupSummary[]> 
     user_id: row.user_id,
     user_name: row.user_name,
     user_email: row.user_email,
-    user_initial: row.user_initial,
+    user_initial: row.user_initial ?? '',
     balance: parseFloat(String(row.balance)),
-    status: row.status,
+    status: row.status as 'receive' | 'pay' | 'settled',
   }))
 }
 
@@ -433,7 +434,7 @@ export async function updateGroup(groupId: string, data: {
   description?: string
 }) {
   const updates: string[] = []
-  const values: (string | number | null)[] = []
+  const values: (string | number | boolean | null)[] = []
   let paramIndex = 1
   
   if (data.name !== undefined) {
@@ -513,7 +514,7 @@ export async function updateUser(userId: string, data: {
   notifications_enabled?: boolean
 }) {
   const updates: string[] = []
-  const values: (string | number | null)[] = []
+  const values: (string | number | boolean | null)[] = []
   let paramIndex = 1
   
   if (data.name !== undefined) {
@@ -562,7 +563,7 @@ export async function updateUser(userId: string, data: {
     }
   } catch (error: unknown) {
     // Vérifier si l'erreur est due à une colonne manquante
-    if (error.message && error.message.includes('notifications_enabled')) {
+    if (error instanceof Error && error.message.includes('notifications_enabled')) {
       throw new Error('La colonne notifications_enabled n\'existe pas. Veuillez exécuter la migration SQL: database/migration_add_notifications_preferences.sql dans Supabase SQL Editor.')
     }
     throw error
@@ -603,9 +604,10 @@ export async function createGroupNotification(
     )
     console.log(`Notification créée pour le groupe ${groupId}, auteur: ${authorUserId}`)
   } catch (error: unknown) {
-    console.error('Erreur lors de la création de la notification:', error.message)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Erreur lors de la création de la notification:', errorMessage)
     // Vérifier si la fonction existe
-    if (error.message.includes('function') && error.message.includes('does not exist')) {
+    if (errorMessage.includes('function') && errorMessage.includes('does not exist')) {
       throw new Error('La fonction create_group_notification n\'existe pas dans la base de données. Exécutez database/migration_add_notifications.sql')
     }
     throw error

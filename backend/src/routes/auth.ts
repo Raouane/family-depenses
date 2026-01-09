@@ -178,7 +178,7 @@ router.get(
         initial: user.initial,
       })
     } catch (error: unknown) {
-      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      if (error instanceof Error && (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError')) {
         return res.status(401).json({ error: 'Token invalide ou expiré' })
       }
       next(error)
@@ -253,7 +253,7 @@ router.post(
       try {
         decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; type?: string }
       } catch (error: unknown) {
-        if (error.name === 'TokenExpiredError') {
+        if (error instanceof Error && error.name === 'TokenExpiredError') {
           return res.status(400).json({ error: 'Le lien de réinitialisation a expiré' })
         }
         return res.status(400).json({ error: 'Token invalide' })

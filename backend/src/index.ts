@@ -88,7 +88,11 @@ if (isProduction) {
 }
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+interface ExpressError extends Error {
+  status?: number
+}
+
+app.use((err: ExpressError, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err)
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
