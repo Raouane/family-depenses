@@ -51,7 +51,7 @@ router.get(
         })),
         createdAt: expense.created_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -114,7 +114,7 @@ router.post(
         receiptImageUrl: expense.receipt_image_url,
         createdAt: expense.created_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }

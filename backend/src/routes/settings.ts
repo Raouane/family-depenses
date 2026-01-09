@@ -34,7 +34,7 @@ router.get(
         value: setting.value,
         description: setting.description,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -72,7 +72,7 @@ router.put(
         description: setting.description,
         updatedAt: setting.updated_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }

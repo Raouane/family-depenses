@@ -78,7 +78,7 @@ router.post(
           initial: user.initial,
         },
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -134,7 +134,7 @@ router.post(
           initial: user.initial,
         },
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -177,7 +177,7 @@ router.get(
         email: user.email,
         initial: user.initial,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
         return res.status(401).json({ error: 'Token invalide ou expiré' })
       }
@@ -227,7 +227,7 @@ router.post(
         // ⚠️ À retirer en production - seulement pour le développement
         resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -252,7 +252,7 @@ router.post(
       let decoded: { userId: string; email: string; type?: string }
       try {
         decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; type?: string }
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error.name === 'TokenExpiredError') {
           return res.status(400).json({ error: 'Le lien de réinitialisation a expiré' })
         }
@@ -284,7 +284,7 @@ router.post(
       )
 
       res.json({ message: 'Mot de passe réinitialisé avec succès' })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }

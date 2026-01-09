@@ -59,7 +59,7 @@ router.get(
           createdAt: settlement.created_at.toISOString(),
         }))
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -105,7 +105,7 @@ router.get(
         },
         createdAt: settlement.created_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -193,7 +193,7 @@ router.post(
         },
         createdAt: completeSettlement!.created_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -220,7 +220,7 @@ router.delete(
       }
 
       res.json({ message: 'Settlement deleted successfully' })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }

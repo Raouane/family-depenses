@@ -88,7 +88,7 @@ if (isProduction) {
 }
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err)
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
@@ -108,7 +108,7 @@ const server = app.listen(PORT, () => {
   console.log(`📡 API available at http://localhost:${PORT}/api`)
 })
 
-server.on('error', (err: any) => {
+server.on('error', (err: NodeJS.ErrnoException) => {
   if (err.code === 'EADDRINUSE') {
     console.error(`❌ Le port ${PORT} est déjà utilisé.`)
     console.error(`💡 Solutions:`)

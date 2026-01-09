@@ -51,7 +51,7 @@ router.get(
           status: user.status,
         })),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -92,7 +92,7 @@ router.get(
           createdAt: expense.created_at.toISOString(),
         })),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -119,7 +119,7 @@ router.get(
           createdAt: group.created_at.toISOString(),
         })),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -156,7 +156,7 @@ router.get(
           email: user.email,
         })),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -190,7 +190,7 @@ router.post(
         description: group.description,
         createdAt: group.created_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -215,7 +215,7 @@ router.post(
       await addUserToGroup(groupId, userId)
       
       res.status(201).json({ message: 'User added to group' })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -239,7 +239,7 @@ router.delete(
       await removeUserFromGroup(groupId, userId)
       
       res.json({ message: 'User removed from group' })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }

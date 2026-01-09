@@ -1,0 +1,63 @@
+---
+name: seniorsstack
+description: This is a new rule
+---
+
+# Overview
+
+
+# Senior React/Next.js/Node/PostgreSQL Rules & Standards
+
+## 🎯 Principes Fondamentaux
+- **Zéro Logique Métier dans le JSX** : Le JSX est exclusivement réservé au rendu. Toute logique (calculs, filtrage, formatage) doit être extraite au-dessus du `return` ou dans des hooks/utilitaires.
+- **Approche "Server-First"** : Utiliser les React Server Components (RSC) par défaut. Réserver `'use client'` aux composants strictement interactifs.
+- **Type Safety Absolu** : Aucun `any`. Utiliser la validation Zod pour chaque entrée/sortie de données.
+
+---
+
+## 🏗 Architecture & Structure de Code
+- **Structure des Dossiers** :
+  - `components/ui` : Composants atomiques Shadcn (ne pas modifier directement).
+  - `components/features` : Composants riches avec logique métier isolée.
+  - `actions/` : Server Actions pour toutes les mutations et accès DB.
+  - `hooks/` : Logique d'état client et réutilisable.
+  - `lib/` : Clients (Prisma, S3, etc.) et fonctions pures.
+- **Composants Propres** : 
+  - Extraire les fonctions de gestion (`handleX`) du JSX.
+  - Utiliser des variables dérivées (ex: `const isEnabled = ...`) plutôt que des conditions complexes inline.
+  - Favoriser la composition : `<Component>{children}</Component>`.
+
+---
+
+## 🗄 Backend & Base de données (Node.js/PostgreSQL)
+- **Data Access** : Utiliser Prisma pour toutes les interactions PostgreSQL.
+- **Transactions** : Utiliser `prisma.$transaction` pour toute opération impliquant plusieurs tables.
+- **Sécurité** : 
+  - Validation systématique via `zod` à l'entrée des Server Actions.
+  - Vérifier l'authentification et les permissions avant toute requête DB.
+- **Performance** : Utiliser `select` pour éviter de récupérer des colonnes inutiles (ex: mots de passe, gros blobs).
+
+---
+
+## 🎨 UI & UX (Shadcn UI & Tailwind)
+- **Styles** : Utiliser exclusivement Tailwind CSS. Ne jamais utiliser de styles inline.
+- **Design System** : Respecter scrupuleusement les variables de thème Shadcn (`primary`, `secondary`, `muted`).
+- **Accessibilité** : Maintenir les attributs ARIA fournis par Radix UI. 
+- **États de chargement** : Utiliser `loading.tsx` (Next.js) ou `Suspense` plutôt que des spinners gérés manuellement dans le JSX.
+
+---
+
+## 🛠 Standards de Développement
+- **Gestion d'Erreurs** : Utiliser des blocs `try/catch` dans les Server Actions et renvoyer un objet standard `{ success: boolean, data?: T, error?: string }`.
+- **Imports** : Utiliser les alias `@/` (ex: `@/components/ui/button`). Organiser les imports : React en premier, Next ensuite, librairies tierces, puis local.
+- **Clean Code** : 
+  - Fonctions courtes et mono-responsables.
+  - Utiliser les "Early Returns" pour éviter l'imbrication (`if (!user) return null`).
+  - Préférer `const` à `let`.
+
+---
+
+## 🤖 Instructions pour l'IA (Cursor)
+- **Refactoring** : Si tu vois de la logique métier dans un `return` JSX, propose immédiatement de l'extraire.
+- **Typage** : Si tu génères un type, vérifie s'il peut être déduit de Prisma ou d'un schéma Zod existant.
+- **Explication** : Toujours justifier un choix architectural s'il dévie de ces règles.

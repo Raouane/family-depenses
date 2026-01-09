@@ -226,11 +226,105 @@ const Home = () => {
     }
   }
 
+  // Variables dérivées (calculées avant le return)
   const currentDate = new Date().toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   })
+
+  // Fonctions utilitaires pour extraire la logique du JSX
+  const getBalanceStatusText = () => {
+    if (userBalanceStatus === 'receive') return 'On vous doit'
+    if (userBalanceStatus === 'pay') return 'Vous devez'
+    return 'Votre solde'
+  }
+
+  const getBalanceSubtext = () => {
+    if (userBalanceStatus === 'settled') return 'Compte équilibré'
+    if (userBalanceStatus === 'pay' && owedTo) return `Vous devez payer à ${owedTo.name}`
+    if (userBalanceStatus === 'receive' && owedFrom.length > 0) {
+      const count = owedFrom.length
+      const names = count === 1 ? owedFrom[0].name : `${count} personnes`
+      const verb = count === 1 ? 'vous doit' : 'vous doivent'
+      return `${names} ${verb}`
+    }
+    return `En date du ${currentDate}`
+  }
+
+  const getCardGradientClass = () => {
+    if (userBalanceStatus === 'receive') return 'from-green-600 to-green-700'
+    if (userBalanceStatus === 'pay') return 'from-red-600 to-red-700'
+    return 'from-gray-600 to-gray-700'
+  }
+
+  const getBrotherStatusText = (brother) => {
+    const isOwedTo = userBalanceStatus === 'pay' && owedTo && brother.name === owedTo.name
+    
+    if (brother.type === 'receive') {
+      return isOwedTo ? 'Vous devez payer à cette personne' : 'Doit recevoir de l\'argent'
+    }
+    return isOwedTo ? 'Vous devez payer à cette personne' : 'Doit payer de l\'argent'
+  }
+
+  const getBrotherCardClass = (brother) => {
+    const isOwedTo = userBalanceStatus === 'pay' && owedTo && brother.name === owedTo.name
+    return isOwedTo ? 'bg-red-50 border-2 border-red-300' : 'bg-gray-50'
+  }
+
+  const getBrotherAvatarClass = (brother) => {
+    const isOwedTo = userBalanceStatus === 'pay' && owedTo && brother.name === owedTo.name
+    return isOwedTo ? 'bg-red-600' : 'bg-gray-600'
+  }
+
+  const getBrotherAmountClass = (brother) => {
+    return brother.type === 'receive' ? 'text-green-700' : 'text-red-700'
+  }
+
+  const getBrotherStatusClass = (brother) => {
+    return brother.type === 'receive' ? 'text-green-700' : 'text-red-700'
+  }
+
+  const canSettleWithBrother = (brother) => {
+    return (userBalanceStatus === 'pay' && brother.type === 'receive') || 
+           (userBalanceStatus === 'receive' && brother.type === 'pay')
+  }
+
+  const getFormattedBalance = () => {
+    return formatAmount(Math.abs(convertAmount(userBalance, 'EUR', displayCurrency)), displayCurrency)
+  }
+
+  const getFormattedBrotherAmount = (brother) => {
+    return formatAmount(convertAmount(brother.amount, 'EUR', displayCurrency), displayCurrency)
+  }
+
+  const getSettlementDescription = () => {
+    if (!selectedBrother) return ''
+    
+    const amount = formatAmount(convertAmount(selectedBrother.amount, 'EUR', displayCurrency), displayCurrency)
+    
+    if (userBalanceStatus === 'pay') {
+      return `Vous allez enregistrer que vous avez payé ${amount} à ${selectedBrother.name}`
+    }
+    return `Vous allez enregistrer que ${selectedBrother.name} vous a payé ${amount}`
+  }
+
+  const getOwedFromText = () => {
+    if (userBalanceStatus === 'receive' && owedFrom.length > 0) {
+      const count = owedFrom.length
+      const names = count === 1 ? owedFrom[0].name : `${count} personnes`
+      const verb = count === 1 ? 'vous doit' : 'vous doivent'
+      return `→ ${names} ${verb}`
+    }
+    return null
+  }
+
+  const getOwedToText = () => {
+    if (userBalanceStatus === 'pay' && owedTo) {
+      return `→ Vous devez payer à ${owedTo.name}`
+    }
+    return null
+  }
 
   const handleOpenSettlementDialog = (brother) => {
     setSelectedBrother(brother)
@@ -357,32 +451,16 @@ const Home = () => {
       </div>
 
       {/* Carte solde personnel */}
-      <Card className={`bg-gradient-to-br ${
-        userBalanceStatus === 'receive' 
-          ? 'from-green-600 to-green-700' 
-          : userBalanceStatus === 'pay'
-          ? 'from-red-600 to-red-700'
-          : 'from-gray-600 to-gray-700'
-      } border-0 mb-6 shadow-lg`}>
+      <Card className={`bg-gradient-to-br ${getCardGradientClass()} border-0 mb-6 shadow-lg`}>
         <CardContent className="p-6">
           <div className="text-white text-base font-semibold mb-3">
-            {userBalanceStatus === 'receive' 
-              ? 'On vous doit' 
-              : userBalanceStatus === 'pay'
-              ? 'Vous devez'
-              : 'Votre solde'}
+            {getBalanceStatusText()}
           </div>
           <div className="text-white text-5xl font-bold mb-3">
-            {formatAmount(Math.abs(convertAmount(userBalance, 'EUR', displayCurrency)), displayCurrency)}
+            {getFormattedBalance()}
           </div>
           <div className="text-white text-sm font-medium">
-            {userBalanceStatus === 'settled' 
-              ? 'Compte équilibré' 
-              : userBalanceStatus === 'pay' && owedTo
-              ? `Vous devez payer à ${owedTo.name}`
-              : userBalanceStatus === 'receive' && owedFrom.length > 0
-              ? `${owedFrom.length === 1 ? owedFrom[0].name : `${owedFrom.length} personnes`} ${owedFrom.length === 1 ? 'vous doit' : 'vous doivent'}`
-              : `En date du ${currentDate}`}
+            {getBalanceSubtext()}
           </div>
         </CardContent>
       </Card>
@@ -402,14 +480,14 @@ const Home = () => {
             <History className="h-4 w-4 mr-2" />
             Historique
           </Button>
-          {userBalanceStatus === 'pay' && owedTo && (
+          {getOwedToText() && (
             <div className="text-sm text-red-600 font-medium">
-              → Vous devez payer à {owedTo.name}
+              {getOwedToText()}
             </div>
           )}
-          {userBalanceStatus === 'receive' && owedFrom.length > 0 && (
+          {getOwedFromText() && (
             <div className="text-sm text-green-600 font-medium">
-              → {owedFrom.length === 1 ? owedFrom[0].name : `${owedFrom.length} personnes`} {owedFrom.length === 1 ? 'vous doit' : 'vous doivent'}
+              {getOwedFromText()}
             </div>
           )}
         </div>
@@ -423,49 +501,30 @@ const Home = () => {
         ) : (
           <div className="space-y-3">
             {users.map((brother) => {
-              // Déterminer si c'est la personne à qui l'utilisateur doit
               const isOwedTo = userBalanceStatus === 'pay' && owedTo && brother.name === owedTo.name
-              // Déterminer si on peut créer un règlement (si l'utilisateur doit payer ou recevoir)
-              const canSettle = (userBalanceStatus === 'pay' && brother.type === 'receive') || 
-                               (userBalanceStatus === 'receive' && brother.type === 'pay')
+              const canSettle = canSettleWithBrother(brother)
+              const amountSign = brother.type === 'receive' ? '+' : '-'
               
               return (
-              <Card key={brother.id} className={`rounded-2xl ${isOwedTo ? 'bg-red-50 border-2 border-red-300' : 'bg-gray-50'}`}>
+              <Card key={brother.id} className={`rounded-2xl ${getBrotherCardClass(brother)}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
                     {/* Avatar */}
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0 ${
-                      isOwedTo ? 'bg-red-600' : 'bg-gray-600'
-                    }`}>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg flex-shrink-0 ${getBrotherAvatarClass(brother)}`}>
                       {brother.initial}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1">
                       <div className="font-semibold text-base text-foreground">{brother.name}</div>
-                      <div
-                        className={`text-base font-medium mt-1 ${
-                          brother.type === 'receive' ? 'text-green-700' : 'text-red-700'
-                        }`}
-                      >
-                        {brother.type === 'receive' 
-                          ? userBalanceStatus === 'pay' && owedTo && brother.name === owedTo.name
-                            ? 'Vous devez payer à cette personne'
-                            : 'Doit recevoir de l\'argent'
-                          : isOwedTo
-                          ? 'Vous devez payer à cette personne'
-                          : 'Doit payer de l\'argent'}
+                      <div className={`text-base font-medium mt-1 ${getBrotherStatusClass(brother)}`}>
+                        {getBrotherStatusText(brother)}
                       </div>
                     </div>
 
                     {/* Montant */}
-                    <div
-                      className={`text-xl font-bold ${
-                        brother.type === 'receive' ? 'text-green-700' : 'text-red-700'
-                      }`}
-                    >
-                      {brother.type === 'receive' ? '+' : '-'}
-                      {formatAmount(convertAmount(brother.amount, 'EUR', displayCurrency), displayCurrency)}
+                    <div className={`text-xl font-bold ${getBrotherAmountClass(brother)}`}>
+                      {amountSign}{getFormattedBrotherAmount(brother)}
                     </div>
                   </div>
                   
@@ -495,8 +554,7 @@ const Home = () => {
       <Button
         onClick={() => navigate('/add-expense')}
         size="icon"
-        className="fixed bottom-24 right-1/2 translate-x-1/2 w-14 h-14 rounded-full shadow-lg z-40"
-        style={{ maxWidth: 'calc(28rem - 2rem)' }}
+        className="fixed bottom-24 right-1/2 translate-x-1/2 w-14 h-14 max-w-[calc(28rem-2rem)] rounded-full shadow-lg z-40"
       >
         <Plus size={24} />
       </Button>
@@ -507,13 +565,7 @@ const Home = () => {
           <DialogHeader>
             <DialogTitle>Enregistrer un règlement</DialogTitle>
             <DialogDescription>
-              {selectedBrother && (
-                <>
-                  {userBalanceStatus === 'pay' 
-                    ? `Vous allez enregistrer que vous avez payé ${formatAmount(convertAmount(selectedBrother.amount, 'EUR', displayCurrency), displayCurrency)} à ${selectedBrother.name}`
-                    : `Vous allez enregistrer que ${selectedBrother.name} vous a payé ${formatAmount(convertAmount(selectedBrother.amount, 'EUR', displayCurrency), displayCurrency)}`}
-                </>
-              )}
+              {getSettlementDescription()}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

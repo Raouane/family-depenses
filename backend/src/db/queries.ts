@@ -1,4 +1,43 @@
 import pool from './connection.js'
+import { QueryResult } from 'pg'
+
+// Database row types
+interface GroupSummaryRow {
+  total_balance: string | number
+  user_id: string
+  user_name: string
+  user_email: string | null
+  user_initial: string | null
+  balance: string | number
+  status: string
+}
+
+interface ExpenseRow {
+  id: string
+  group_id: string
+  title: string
+  amount: string | number
+  date: string | Date
+  paid_by_user_id: string
+  paid_by_name: string
+  paid_by_initial: string
+  category: string | null
+  receipt_image_url: string | null
+  created_at: string | Date
+  updated_at: string | Date
+}
+
+interface NotificationRow {
+  id: string
+  group_id: string
+  user_id: string
+  type: string
+  title: string
+  message: string
+  related_entity_id: string | null
+  is_read: boolean
+  created_at: string | Date
+}
 
 export interface GroupSummary {
   total_balance: number
@@ -43,13 +82,13 @@ export async function getGroupSummary(groupId: string): Promise<GroupSummary[]> 
     'SELECT * FROM get_group_summary($1)',
     [groupId]
   )
-  return result.rows.map((row: any) => ({
-    total_balance: parseFloat(row.total_balance),
+  return result.rows.map((row: GroupSummaryRow) => ({
+    total_balance: parseFloat(String(row.total_balance)),
     user_id: row.user_id,
     user_name: row.user_name,
     user_email: row.user_email,
     user_initial: row.user_initial,
-    balance: parseFloat(row.balance),
+    balance: parseFloat(String(row.balance)),
     status: row.status,
   }))
 }
@@ -79,7 +118,7 @@ export async function getGroupExpenses(
     JOIN users u ON e.paid_by_user_id = u.id
     WHERE e.group_id = $1
   `
-  const params: any[] = [groupId]
+  const params: (string | number)[] = [groupId]
 
   if (search) {
     query += ' AND e.title ILIKE $2'
@@ -89,10 +128,17 @@ export async function getGroupExpenses(
   query += ' ORDER BY e.date DESC, e.created_at DESC'
 
   const result = await pool.query(query, params)
-  return result.rows.map((row: any) => ({
-    ...row,
-    amount: parseFloat(row.amount),
+  return result.rows.map((row: ExpenseRow) => ({
+    id: row.id,
+    group_id: row.group_id,
+    title: row.title,
+    amount: parseFloat(String(row.amount)),
     date: new Date(row.date),
+    paid_by_user_id: row.paid_by_user_id,
+    paid_by_name: row.paid_by_name,
+    paid_by_initial: row.paid_by_initial,
+    category: row.category,
+    receipt_image_url: row.receipt_image_url,
     created_at: new Date(row.created_at),
     updated_at: new Date(row.updated_at),
   }))
@@ -387,7 +433,7 @@ export async function updateGroup(groupId: string, data: {
   description?: string
 }) {
   const updates: string[] = []
-  const values: any[] = []
+  const values: (string | number | null)[] = []
   let paramIndex = 1
   
   if (data.name !== undefined) {
@@ -467,7 +513,7 @@ export async function updateUser(userId: string, data: {
   notifications_enabled?: boolean
 }) {
   const updates: string[] = []
-  const values: any[] = []
+  const values: (string | number | null)[] = []
   let paramIndex = 1
   
   if (data.name !== undefined) {
@@ -514,7 +560,7 @@ export async function updateUser(userId: string, data: {
       created_at: new Date(result.rows[0].created_at),
       updated_at: new Date(result.rows[0].updated_at),
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Vérifier si l'erreur est due à une colonne manquante
     if (error.message && error.message.includes('notifications_enabled')) {
       throw new Error('La colonne notifications_enabled n\'existe pas. Veuillez exécuter la migration SQL: database/migration_add_notifications_preferences.sql dans Supabase SQL Editor.')
@@ -556,7 +602,7 @@ export async function createGroupNotification(
       [groupId, authorUserId, type, title, message, relatedExpenseId]
     )
     console.log(`Notification créée pour le groupe ${groupId}, auteur: ${authorUserId}`)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erreur lors de la création de la notification:', error.message)
     // Vérifier si la fonction existe
     if (error.message.includes('function') && error.message.includes('does not exist')) {

@@ -33,7 +33,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     req.userId = decoded.userId
 
     next()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token invalide ou expiré' })
     }

@@ -38,7 +38,7 @@ router.get(
       const notifications = await getUserNotifications(userId, limit)
       
       res.json({ notifications })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -57,7 +57,7 @@ router.get(
       const count = await getUnreadNotificationsCount(userId)
       
       res.json({ count })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -80,7 +80,7 @@ router.put(
       await markNotificationAsRead(id, userId)
       
       res.json({ success: true })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -100,7 +100,7 @@ router.put(
       await markAllNotificationsAsRead(userId)
       
       res.json({ success: true })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }

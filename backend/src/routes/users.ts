@@ -40,7 +40,7 @@ router.get(
         notifications_enabled: user.notifications_enabled ?? true,
         createdAt: user.created_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
@@ -77,7 +77,7 @@ router.put(
         createdAt: user.created_at.toISOString(),
         updatedAt: user.updated_at.toISOString(),
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error)
     }
   }
